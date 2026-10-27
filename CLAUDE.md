@@ -30,7 +30,7 @@
 Все `<img>`/`<video>` ниже hero — с `data-src` вместо `src` (без `src` новые медиа не добавлять: загрузит только код из `scripts.js`, блок «Media loading»).
 1. **Критичное** (грузится во время лоадера, параллельно) — `<link rel="preload">` в `<head>`: Aeonik Pro Regular + Medium, `hero2_compressed.jpg`; плюс `data-load="critical"`: `LH_arch.webm`, 1-й слайд «Концепції» (`Location.webm`), 1-я карточка клабхауса (SPA), 1-е видео галереи вилл (`terrace.webm`), `build1.mp4`, обложки 5 сторис вилл (картинки ещё и `decode()`). Видео — до `canplaythrough`. `window.criticalReady` + `window.loadProgress()` (0..1), общий лимит `CRITICAL_MAX` = 15с.
 2. **Очередь** — `data-load="queue"`, по одному в порядке страницы после `criticalReady`: первый слайд остальных `.gallery` / `.carousel`, `build2`. Следующий файл — после `canplaythrough`/`load` (или 10с).
-3. **Остальное** — слайды `.gallery`/`.carousel` целиком, когда блок в ~1 экране (`rootMargin: 100%`); `.stories` сами грузят текущий + следующий слайд, когда рядом. Клик по вкладке галереи подгружает её сразу.
+3. **Остальное** — слайды `.gallery`/`.carousel` целиком, когда блок в ~1 экране (`rootMargin: 100%`); `.stories` сами грузят текущий + следующий слайд (с `preload='auto'`), когда рядом; плюс когда первая вилла в ~1 экране, все слайды всех вилл грузятся фоном по одному по порядку. Клик по вкладке галереи подгружает её сразу.
 - Inter (Google Fonts) удалён — не использовался. PP Hatton не в preload (только лого).
 
 ## Система анимаций (`data-anim`)

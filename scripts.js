@@ -200,11 +200,14 @@ document.querySelectorAll('.stories').forEach(function (root) {
     var current = 0;
     var isNear = false;
 
-    // media of the visible slide and the next one, only once the block is close to the screen
+    // media of the visible slide and the next one, only once the block is close to the screen;
+    // preload="none" in the markup would keep the next video unbuffered (black) until shown
     function loadAround() {
         if (!isNear) return;
-        loadMediaIn(slides[current]);
-        loadMediaIn(slides[(current + 1) % slides.length]);
+        [slides[current], slides[(current + 1) % slides.length]].forEach(function (slide) {
+            slide.querySelectorAll('video').forEach(function (v) { v.preload = 'auto'; });
+            loadMediaIn(slide);
+        });
     }
 
     function show(index) {
@@ -250,6 +253,30 @@ document.querySelectorAll('.stories').forEach(function (root) {
 
     show(0);
 });
+
+// Once the first villa banner is near, all villa slides load in the background,
+// one file at a time in page order, so flipping through them never hits a black frame
+(function () {
+    var first = document.querySelector('.types .stories');
+    if (!first) return;
+    var started = false;
+    var obs = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting || started) return;
+        started = true;
+        obs.disconnect();
+        window.criticalReady.then(function () {
+            var queue = Array.prototype.slice.call(document.querySelectorAll('.types .stories [data-src]'));
+            (function next() {
+                var el = queue.shift();
+                if (!el) return;
+                if (el.tagName === 'VIDEO') el.preload = 'auto';
+                loadMedia(el); // no-op if the slider already pulled it in
+                whenLoaded(el).then(next);
+            })();
+        });
+    }, { rootMargin: '100% 0px' });
+    obs.observe(first);
+})();
 
 // Pill header: shows up once the hero has scrolled out of view, expands into the menu
 (function () {
