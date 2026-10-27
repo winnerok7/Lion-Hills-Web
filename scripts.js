@@ -1,0 +1,465 @@
+// ---------- Media loading ----------
+// Everything below the hero has data-src instead of src. Order:
+// 1) critical, loaded while the loader runs (its line/% show the real progress):
+//    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero)
+// 2) queue: [data-load="queue"] one by one in page order (first slide of the other sliders, build2)
+// 3) the rest: gallery/carousel slides once their block is about a screen away; stories load current + next slide
+
+var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
+
+function loadMedia(el) {
+    var src = el && el.getAttribute('data-src');
+    if (!src) return;
+    el.removeAttribute('data-src');
+    el.src = src;
+}
+
+function loadMediaIn(root) {
+    if (!root) return;
+    if (root.hasAttribute('data-src')) loadMedia(root);
+    root.querySelectorAll('[data-src]').forEach(loadMedia);
+}
+
+// resolves once the file is usable (or failed / took too long), so one slow file doesn't stall everything
+function whenLoaded(el, max) {
+    return new Promise(function (resolve) {
+        var t = setTimeout(resolve, max || 10000);
+        function done() { clearTimeout(t); resolve(); }
+        el.addEventListener('error', done, { once: true });
+        if (el.tagName === 'VIDEO') {
+            if (el.readyState >= 4) return done();
+            el.addEventListener('canplaythrough', done, { once: true });
+        } else {
+            if (el.complete && el.naturalWidth) return done();
+            el.addEventListener('load', done, { once: true });
+        }
+    });
+}
+
+// critical set: window.criticalReady (promise) + window.loadProgress() (0..1) for the loader;
+// animations.js holds the hero curtain on criticalReady too
+(function () {
+    var parts = []; // each: { done, fraction() }
+    var finished = false;
+
+    function track(promise, fraction) {
+        var part = { done: false, fraction: fraction || function () { return 0; } };
+        parts.push(part);
+        return Promise.resolve(promise).then(function () { part.done = true; });
+    }
+
+    var waits = [];
+    waits.push(track(document.fonts ? document.fonts.ready : null));
+
+    var media = document.querySelector('.hero_media');
+    var bg = media && getComputedStyle(media).backgroundImage.match(/url\(["']?(.*?)["']?\)/);
+    if (bg) {
+        var img = new Image();
+        img.src = bg[1];
+        waits.push(track(img.decode ? img.decode().catch(function () {}) : null));
+    }
+
+    // all at once, in parallel with the hero; a video counts by how much of it is buffered;
+    // images are decoded up front too, so big ones (villa covers) don't stutter when scrolled to
+    document.querySelectorAll('[data-load="critical"]').forEach(function (el) {
+        if (el.tagName === 'VIDEO') el.preload = 'auto';
+        loadMedia(el);
+        var usable = whenLoaded(el, CRITICAL_MAX).then(function () {
+            if (el.tagName === 'IMG' && el.decode) return el.decode().catch(function () {});
+        });
+        waits.push(track(usable, function () {
+            if (el.tagName !== 'VIDEO' || !el.duration || !el.buffered.length) return 0;
+            return Math.min(0.95, el.buffered.end(el.buffered.length - 1) / el.duration);
+        }));
+    });
+
+    window.criticalReady = Promise.race([
+        Promise.all(waits),
+        new Promise(function (r) { setTimeout(r, CRITICAL_MAX); })
+    ]).then(function () { finished = true; });
+
+    window.loadProgress = function () {
+        if (finished || !parts.length) return 1;
+        var sum = 0;
+        parts.forEach(function (p) { sum += p.done ? 1 : p.fraction(); });
+        return sum / parts.length;
+    };
+})();
+
+(function () {
+    window.criticalReady.then(function () {
+        var queue = Array.prototype.slice.call(document.querySelectorAll('[data-load="queue"]'));
+        (function next() {
+            var el = queue.shift();
+            if (!el) return;
+            if (el.tagName === 'VIDEO') el.preload = 'auto';
+            loadMedia(el); // no-op if a block already pulled it in
+            whenLoaded(el).then(next);
+        })();
+    });
+
+    // the rest: whole gallery / carousel at once, standalone media by itself (stories handle their own)
+    var roots = [];
+    document.querySelectorAll('[data-src]').forEach(function (el) {
+        if (el.closest('.stories')) return;
+        var root = el.closest('.gallery, .carousel') || el;
+        if (roots.indexOf(root) < 0) roots.push(root);
+    });
+    var near = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            near.unobserve(e.target);
+            loadMediaIn(e.target);
+        });
+    }, { rootMargin: '100% 0px' });
+    roots.forEach(function (root) { near.observe(root); });
+})();
+
+
+document.querySelectorAll(".gallery").forEach(function (gallery) {
+
+    var items = gallery.querySelectorAll('.gallery_item');
+    var tabs = gallery.querySelectorAll('.gallery_tab');
+    var captions = gallery.querySelectorAll('.gallery_caption');
+    var next = gallery.querySelector('.gallery_next');
+    var current = 0;
+
+    function currentVideo() {
+        return items[current].querySelector('video');
+    }
+
+    function show(index) {
+        var prev = currentVideo();
+        if (prev) prev.pause();
+
+        current = index;
+        items.forEach(function (el, i) { el.classList.toggle('active', i === index); });
+        tabs.forEach(function (el, i) { el.classList.toggle('active', i === index); });
+        captions.forEach(function (el, i) { el.classList.toggle('active', i === index); });
+        loadMediaIn(items[index]); // a tab clicked before the block got near
+
+        var video = currentVideo();
+        if (video) {
+            video.currentTime = 0;
+            video.play().catch(function () {});
+        }
+    }
+
+    tabs.forEach(function (tab, i) {
+        tab.addEventListener('click', function () { show(i); });
+    });
+
+    // next slide, skipping slides whose tab is hidden (e.g. on mobile)
+    next.addEventListener('click', function () {
+        var i = current;
+        do { i = (i + 1) % items.length; } while (i !== current && tabs[i] && tabs[i].offsetParent === null);
+        show(i);
+    });
+
+    // Autoplay the first video when the gallery scrolls into view
+    var started = false;
+    new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting && !started) {
+            started = true;
+            show(0);
+        }
+    }, { threshold: 0.4 }).observe(gallery);
+});
+
+    document.querySelectorAll(".carousel").forEach(function (root) {
+    if (!root) return;
+
+    var track = root.querySelector('.carousel_track');
+    var prev = root.querySelector('.carousel_prev');
+    var next = root.querySelector('.carousel_next');
+
+    function step() {
+        var card = track.querySelector('.carousel_card');
+        return card.getBoundingClientRect().width + 20;
+    }
+
+    function update() {
+        prev.disabled = track.scrollLeft <= 1;
+        next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+    }
+
+    prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+    next.addEventListener('click', function () { track.scrollBy({ left: step(), behavior: 'smooth' }); });
+    track.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+});
+
+
+document.querySelectorAll('.stories').forEach(function (root) {
+    var slides = root.querySelectorAll('.stories_slide');
+    if (slides.length < 2) return; // a single cover slide: nothing to switch
+    var segs = root.querySelectorAll('.stories_seg');
+    var prev = root.querySelector('.stories_prev');
+    var next = root.querySelector('.stories_next');
+    var current = 0;
+    var isNear = false;
+
+    // media of the visible slide and the next one, only once the block is close to the screen
+    function loadAround() {
+        if (!isNear) return;
+        loadMediaIn(slides[current]);
+        loadMediaIn(slides[(current + 1) % slides.length]);
+    }
+
+    function show(index) {
+        current = index;
+        loadAround();
+        slides.forEach(function (el, i) { el.classList.toggle('active', i === current); });
+        segs.forEach(function (el, i) {
+            el.classList.remove('active');
+            el.classList.toggle('done', i < current);
+        });
+        void root.offsetWidth; // restart the fill animation
+        segs[current].classList.add('active');
+        prev.hidden = current === 0;
+        // only the visible slide's video plays
+        slides.forEach(function (el, i) {
+            var v = el.querySelector('video');
+            if (!v) return;
+            if (i === current) { v.currentTime = 0; v.play().catch(function () {}); } else { v.pause(); }
+        });
+    }
+
+    function goNext() { show((current + 1) % slides.length); }
+
+    next.addEventListener('click', goNext);
+    prev.addEventListener('click', function () { show(current - 1); });
+    segs.forEach(function (seg, i) {
+        seg.addEventListener('animationend', goNext);
+        seg.addEventListener('click', function () { show(i); });
+    });
+
+    // The progress bar only runs while the block is on screen
+    new IntersectionObserver(function (entries) {
+        root.classList.toggle('in_view', entries[0].isIntersecting);
+    }, { threshold: 0.5 }).observe(root);
+
+    var nearObserver = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        nearObserver.disconnect();
+        isNear = true;
+        loadAround();
+    }, { rootMargin: '100% 0px' });
+    nearObserver.observe(root);
+
+    show(0);
+});
+
+// Pill header: shows up once the hero has scrolled out of view, expands into the menu
+(function () {
+    var bar = document.querySelector('.sticky_header');
+    var hero = document.querySelector('.hero');
+    if (!bar || !hero) return;
+
+    var toggle = bar.querySelector('.sticky_header_menu');
+    var panel = bar.querySelector('.sticky_header_panel');
+    var barLinks = bar.querySelectorAll('.sticky_header_bar a, .sticky_header_bar button');
+    var panelLinks = panel.querySelectorAll('a');
+    var heroMenu = document.querySelector('.header_menu');
+    var CLOSED = 66;
+    var pastHero = false;
+    var open = false;
+
+    function render() {
+        var show = pastHero || open;
+        bar.classList.toggle('is-visible', show);
+        bar.classList.toggle('is-open', open);
+        document.documentElement.classList.toggle('menu-open', open);
+        bar.setAttribute('aria-hidden', show ? 'false' : 'true');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        bar.style.height = open ? (CLOSED + panel.offsetHeight) + 'px' : '';
+        barLinks.forEach(function (el) { el.tabIndex = show ? 0 : -1; });
+        panelLinks.forEach(function (el) { el.tabIndex = open ? 0 : -1; });
+    }
+
+    function setOpen(value) {
+        if (open === value) return;
+        open = value;
+        render();
+    }
+
+    toggle.addEventListener('click', function () { setOpen(!open); });
+    // on desktop the hero button opens the glass drawer instead (see below)
+    if (heroMenu) heroMenu.addEventListener('click', function () {
+        if (window.innerWidth <= 767) setOpen(true);
+    });
+
+    // menu anchors: close, then glide to the section under the pill
+    panel.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        var target = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href'));
+        if (!target) return;
+        a.addEventListener('click', function (e) {
+            e.preventDefault();
+            setOpen(false);
+            if (window.lenis) window.lenis.scrollTo(target, { offset: -110 });
+            else target.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && open) { setOpen(false); toggle.focus(); }
+    });
+    document.addEventListener('click', function (e) {
+        if (open && !bar.contains(e.target) && !(heroMenu && heroMenu.contains(e.target))) setOpen(false);
+    });
+    window.addEventListener('resize', function () { if (open) render(); });
+
+    new IntersectionObserver(function (entries) {
+        var e = entries[0];
+        pastHero = !e.isIntersecting && e.boundingClientRect.bottom <= 0;
+        render();
+    }).observe(hero);
+})();
+
+// Floorplan download pill: stays on from the first villa banner through the last one
+(function () {
+    var link = document.querySelector('.plan_download');
+    var villas = document.querySelectorAll('.types .stories');
+    if (!link || !villas.length) return;
+
+    var first = villas[0];
+    var last = villas[villas.length - 1];
+    var ticking = false;
+
+    function update() {
+        ticking = false;
+        var vh = window.innerHeight;
+        // first banner has (almost) filled the screen and the last one hasn't left it yet
+        var show = first.getBoundingClientRect().top <= vh * 0.15 &&
+                   last.getBoundingClientRect().bottom >= vh * 0.85;
+        if (show === link.classList.contains('is-visible')) return;
+        link.classList.toggle('is-visible', show);
+        link.setAttribute('aria-hidden', show ? 'false' : 'true');
+        link.tabIndex = show ? 0 : -1;
+    }
+
+    window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+})();
+
+// Hero menu on desktop: glass drawer with Kyiv time and date
+(function () {
+    var drawer = document.querySelector('.drawer');
+    var heroMenu = document.querySelector('.header_menu');
+    if (!drawer || !heroMenu) return;
+
+    var clock = drawer.querySelector('.drawer_clock');
+    var date = drawer.querySelector('.drawer_date');
+    var focusables = drawer.querySelectorAll('a, button');
+    var open = false;
+    var timer = null;
+
+    function tick() {
+        var now = new Date();
+        clock.textContent = now.toLocaleTimeString('uk-UA', { timeZone: 'Europe/Kyiv', hour: '2-digit', minute: '2-digit' });
+        date.textContent = now.toLocaleDateString('uk-UA', { timeZone: 'Europe/Kyiv', day: 'numeric', month: 'long', weekday: 'short' });
+    }
+
+    function setOpen(value) {
+        if (open === value) return;
+        open = value;
+        drawer.classList.toggle('is-open', open);
+        drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+        heroMenu.setAttribute('aria-expanded', open ? 'true' : 'false');
+        focusables.forEach(function (el) { el.tabIndex = open ? 0 : -1; });
+        clearInterval(timer);
+        if (open) { tick(); timer = setInterval(tick, 10000); }
+        openedAt = window.scrollY;
+    }
+
+    // scrolling away closes it (page scroll stays on, so the scrollbar doesn't jump)
+    var openedAt = 0;
+    window.addEventListener('scroll', function () {
+        if (open && Math.abs(window.scrollY - openedAt) > 60) setOpen(false);
+    }, { passive: true });
+
+    heroMenu.setAttribute('aria-controls', 'hero-menu');
+    heroMenu.setAttribute('aria-expanded', 'false');
+    heroMenu.addEventListener('click', function () {
+        if (window.innerWidth > 767) setOpen(!open);
+    });
+    drawer.querySelectorAll('.drawer_handle, .drawer_close').forEach(function (el) {
+        el.addEventListener('click', function () { setOpen(false); });
+    });
+
+    drawer.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        var target = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href'));
+        if (!target) return;
+        a.addEventListener('click', function (e) {
+            e.preventDefault();
+            setOpen(false);
+            if (window.lenis) window.lenis.scrollTo(target, { offset: -110 });
+            else target.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && open) { setOpen(false); heroMenu.focus(); }
+    });
+    document.addEventListener('click', function (e) {
+        if (open && !drawer.contains(e.target) && !heroMenu.contains(e.target)) setOpen(false);
+    });
+    window.addEventListener('resize', function () { if (open && window.innerWidth <= 767) setOpen(false); });
+})();
+
+// FAQ accordion: one answer open at a time
+document.querySelectorAll('.faq_list').forEach(function (list) {
+    var items = list.querySelectorAll('.faq_item');
+
+    items.forEach(function (item) {
+        item.querySelector('.faq_question').addEventListener('click', function () {
+            var open = !item.classList.contains('is-open');
+            items.forEach(function (el) {
+                var on = el === item && open;
+                el.classList.toggle('is-open', on);
+                el.querySelector('.faq_question').setAttribute('aria-expanded', on ? 'true' : 'false');
+            });
+            // page height changed: re-measure scroll triggers once the answer settles
+            setTimeout(function () { if (window.ScrollTrigger) ScrollTrigger.refresh(); }, 550);
+        });
+    });
+});
+
+// Footer form: no backend yet, so just acknowledge the request
+document.querySelectorAll('.footer_form').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        form.querySelector('.footer_submit').textContent = 'Дякуємо!';
+        form.reset();
+    });
+});
+
+// Header veil: match the color of whatever is under the top edge (white card vs dark sections)
+(function () {
+    var fade = document.querySelector('.sticky_fade');
+    if (!fade || !document.elementsFromPoint) return;
+
+    var SKIP = '.sticky_header, .sticky_fade, .drawer, .plan_download';
+    var ticking = false;
+
+    function update() {
+        ticking = false;
+        var stack = document.elementsFromPoint(window.innerWidth / 2, 2);
+        var el = null;
+        for (var i = 0; i < stack.length; i++) {
+            if (!stack[i].closest(SKIP)) { el = stack[i]; break; }
+        }
+        // dark only over the two dark screens (infrastructure, autonomy), white everywhere else
+        fade.classList.toggle('is-dark', !!(el && el.closest('.clubhouse')));
+    }
+
+    window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+})();

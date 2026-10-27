@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lion Hills</title>
+    <!-- critical for the loader: its text font, % counter font and the hero photo; all other media goes through scripts.js -->
+    <link rel="preload" href="fonts/AeonikPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="fonts/AeonikPro-Medium.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="media/hero2_compressed.jpg" as="image" fetchpriority="high">
+    <link rel="stylesheet" href="style.css">
+    <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.classList.add("js-anim","is-loading");if("scrollRestoration" in history)history.scrollRestoration="manual"}</script>
+</head>
+<body>
+
+    <div class="loader" id="loader" aria-hidden="true">
+        <div class="loader_frame" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <p class="loader_text">
+            <span class="loader_part loader_logo">
+                <svg viewBox="0 0 147 22" fill="none" role="img" aria-label="Lion Hills">
+                    <path d="M12.4321 21.1941H-1.58548e-05C0.206756 19.1264 0.284295 18.015 0.284295 15.8697V5.84132C0.284295 3.69607 0.232602 2.58467 0.0516771 0.516957H4.05787C3.87695 2.58467 3.82525 3.69607 3.82525 5.84132V20.703H5.78958C8.45176 20.703 10.0801 20.5479 13.285 19.4624L12.4321 21.1941ZM19.403 21.1941H15.3968C15.5777 19.1264 15.6294 18.015 15.6294 15.8697V5.84132C15.6294 3.69607 15.5777 2.58467 15.3968 0.516957H19.403C19.222 2.58467 19.1704 3.69607 19.1704 5.84132V15.8697C19.1704 18.015 19.222 19.1264 19.403 21.1941ZM33.9701 21.711C27.1466 21.711 22.029 17.4205 22.029 10.8555C22.029 4.31638 27.1466 2.74181e-05 33.9701 2.74181e-05C40.7418 2.74181e-05 45.8853 4.31638 45.8853 10.8555C45.8853 17.4205 40.7418 21.711 33.9701 21.711ZM33.9701 21.2199C39.1652 21.2199 42.06 16.3091 42.06 10.8555C42.06 5.42778 39.1652 0.491109 33.9701 0.491109C28.7232 0.491109 25.8543 5.42778 25.8543 10.8555C25.8543 16.3091 28.7232 21.2199 33.9701 21.2199ZM49.2909 21.1941H48.3863C48.5672 19.1264 48.6189 18.015 48.6189 15.8697V5.84132C48.6189 3.69607 48.5672 2.58467 48.3863 0.516957H52.5476L63.9717 20.1085L64.0234 20.1344V5.84132C64.0234 3.69607 63.9458 2.58467 63.7649 0.516957H64.6954C64.4886 2.58467 64.4369 3.69607 64.4369 5.84132V15.8697C64.4369 18.015 64.4886 19.1264 64.6954 21.1941H60.5083L49.11 1.60251L49.0583 1.57666V15.8697C49.0583 18.015 49.11 19.1264 49.2909 21.1941ZM91.9775 5.84132V15.8697C91.9775 18.015 92.0292 19.1264 92.2101 21.1941H88.2039C88.3848 19.1264 88.4365 18.015 88.4365 15.8697V11.0881H79.5712V15.8697C79.5712 18.015 79.6229 19.1264 79.8038 21.1941H75.7976C75.9786 19.1264 76.0303 18.015 76.0303 15.8697V5.84132C76.0303 3.69607 75.9786 2.58467 75.7976 0.516957H79.8038C79.6229 2.58467 79.5712 3.69607 79.5712 5.84132V10.6229H88.4365V5.84132C88.4365 3.69607 88.3848 2.58467 88.2039 0.516957H92.2101C92.0292 2.58467 91.9775 3.69607 91.9775 5.84132ZM99.2391 21.1941H95.2329C95.4139 19.1264 95.4656 18.015 95.4656 15.8697V5.84132C95.4656 3.69607 95.4139 2.58467 95.2329 0.516957H99.2391C99.0582 2.58467 99.0065 3.69607 99.0065 5.84132V15.8697C99.0065 18.015 99.0582 19.1264 99.2391 21.1941ZM114.682 21.1941H102.25C102.457 19.1264 102.534 18.015 102.534 15.8697V5.84132C102.534 3.69607 102.482 2.58467 102.302 0.516957H106.308C106.127 2.58467 106.075 3.69607 106.075 5.84132V20.703H108.039C110.702 20.703 112.33 20.5479 115.535 19.4624L114.682 21.1941ZM130.079 21.1941H117.647C117.853 19.1264 117.931 18.015 117.931 15.8697V5.84132C117.931 3.69607 117.879 2.58467 117.698 0.516957H121.705C121.524 2.58467 121.472 3.69607 121.472 5.84132V20.703H123.436C126.098 20.703 127.727 20.5479 130.932 19.4624L130.079 21.1941ZM139.951 21.711C136.022 21.711 132.972 20.0052 130.93 15.1202L133.541 13.7245C134.239 18.0667 136.772 21.2199 140.183 21.2199C142.458 21.2199 144.034 20.0052 144.034 17.679C144.034 15.5596 141.812 14.1122 137.78 11.2174C133.825 8.37427 132.197 7.08195 132.197 4.36807C132.197 1.49912 134.626 2.74181e-05 137.754 2.74181e-05C140.959 2.74181e-05 143.388 1.52497 145.482 4.885L142.871 5.9447C142.251 3.23083 140.907 0.491109 137.573 0.491109C135.453 0.491109 134.187 1.57666 134.187 3.12744C134.187 4.91085 135.505 5.78963 138.969 8.19334C143.621 11.45 146.025 13.0783 146.025 16.4384C146.025 20.0052 143.233 21.711 139.951 21.711Z" fill="currentColor"/>
+                </svg>
+            </span>
+            <span class="loader_phrase">
+                <span class="loader_part">Життя на висоті<span class="loader_dot">.</span></span>
+                <span class="loader_part">Лісники, Київ</span>
+            </span>
+        </p>
+        <p class="loader_percent">0%</p>
+    </div>
+
+    <div class="main_section">
+
+        <header class="sticky_header" aria-hidden="true">
+            <div class="sticky_header_bar">
+                <a class="sticky_header_logo" href="#" tabindex="-1">Lion Hills</a>
+                <button class="sticky_header_menu" type="button" aria-expanded="false" aria-controls="site-menu" tabindex="-1">
+                    <span class="sticky_header_label">Меню</span>
+                    <span class="sticky_header_label sticky_header_label_close">Закрити</span>
+                    <span class="sticky_header_icon">
+                        <svg class="sticky_header_burger" width="17" height="11" viewBox="0 0 17 11" fill="none" aria-hidden="true">
+                            <path d="M0 0.349616H16.6207" stroke-width="0.699205" stroke="white"/>
+                            <path d="M0 5.41688H16.6207" stroke-width="0.699205" stroke="white"/>
+                            <path d="M6.50488 10.4836L16.6218 10.4836" stroke-width="0.699205" stroke="white"/>
+                        </svg>
+                        <svg class="sticky_header_close" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                            <path d="M1 1L14 14M14 1L1 14" stroke-width="0.9" stroke="white"/>
+                        </svg>
+                    </span>
+                </button>
+                <a class="sticky_header_wa" href="#" aria-label="WhatsApp" tabindex="-1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/>
+                        <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/>
+                    </svg>
+                </a>
+            </div>
+
+            <nav class="sticky_header_panel" id="site-menu" aria-label="Меню">
+                <ul class="menu_links">
+                    <li style="--i: 0"><a href="#concept" tabindex="-1">Концепція</a></li>
+                    <li style="--i: 1"><a href="#location" tabindex="-1">Локація</a></li>
+                    <li style="--i: 2"><a href="#autonomy" tabindex="-1">Автономність</a></li>
+                    <li style="--i: 3"><a href="#build" tabindex="-1">Будівництво</a></li>
+                    <li style="--i: 0"><a href="#villas" tabindex="-1">Вілли</a></li>
+                    <li style="--i: 1"><a href="#penthouses" tabindex="-1">Пентхауси</a></li>
+                    <li style="--i: 2"><a href="#infrastructure" tabindex="-1">Інфраструктура</a></li>
+                </ul>
+                <div class="menu_bottom" style="--i: 4">
+                    <a class="menu_btn btn-soft" href="#" tabindex="-1">Завантажити брошуру</a>
+                    <div class="menu_contacts">
+                        <a href="tel:+380657865567" tabindex="-1">+380657865567</a>
+                        <a href="mailto:lionhillsvillas@gmail.com" tabindex="-1">lionhillsvillas@gmail.com</a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="sticky_fade" aria-hidden="true"></div>
+
+        <aside class="drawer" id="hero-menu" aria-label="Меню" aria-hidden="true">
+            <button class="drawer_handle" type="button" aria-label="Закрити" tabindex="-1"></button>
+            <div class="drawer_top" style="--i: 0">
+                <div>
+                    <p class="drawer_time"><span class="drawer_clock">--:--</span><small>(Київ)</small></p>
+                    <p class="drawer_date"></p>
+                </div>
+                <button class="drawer_close" type="button" tabindex="-1">
+                    Закрити
+                    <svg width="13" height="13" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                        <path d="M1 1L14 14M14 1L1 14" stroke-width="1" stroke="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            <nav class="drawer_nav">
+                <a class="drawer_link" href="#concept" style="--i: 1" tabindex="-1">Концепція</a>
+                <a class="drawer_link" href="#location" style="--i: 2" tabindex="-1">Локація</a>
+                <a class="drawer_link" href="#infrastructure" style="--i: 3" tabindex="-1">Інфраструктура</a>
+                <a class="drawer_link" href="#autonomy" style="--i: 4" tabindex="-1">Автономність</a>
+                <a class="drawer_link" href="#villas" style="--i: 5" tabindex="-1">Вілли</a>
+                <a class="drawer_link" href="#penthouses" style="--i: 6" tabindex="-1">Пентхауси</a>
+                <a class="drawer_link" href="#build" style="--i: 7" tabindex="-1">Будівництво</a>
+            </nav>
+            <a class="drawer_btn btn-soft" href="#" style="--i: 8" tabindex="-1">Завантажити брошуру</a>
+        </aside>
+
+        <a class="plan_download" href="#" aria-hidden="true" tabindex="-1">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                <path d="M5 2.5H2.5v11h11v-11H11"/>
+                <path d="M8 1.5v8M5 6.5l3 3 3-3"/>
+            </svg>
+            <span>Скачати планування цієї вілли</span>
+        </a>
+
+        <div class="hero">
+            <div class="hero_media" aria-hidden="true"></div>
+            <header class="header" data-anim="hero-header">
+                <a class="header_logo" href="#">Lion Hills</a>
+                <div class="header_actions">
+                    <a class="header_phone" href="tel:+380632263062">+380 (63) 226 30 62</a>
+                    <button class="header_menu" type="button" aria-label="Меню">
+                        <span class="header_menu_text">Меню</span>
+                        <svg class="header_burger" width="17" height="11" viewBox="0 0 17 11" fill="none" aria-hidden="true">
+                            <path d="M0 0.349616H16.6207" stroke-width="0.699205" stroke="white"/>
+                            <path d="M0 5.41688H16.6207" stroke-width="0.699205" stroke="white"/>
+                            <path d="M6.50488 10.4836L16.6218 10.4836" stroke-width="0.699205" stroke="white"/>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="hero_content">
+                <h1 class="hero_title" data-anim="hero-title">Вілли та Пентхауси<br>від 124 до 850 м²</h1>
+                <p class="hero_subtitle" data-anim="hero-fade">Лісники, Київ</p>
+            </div>
+            <a class="hero_btn btn-soft" data-anim="hero-fade" href="#">Запис на перегляд</a>
+        </div>
+
+
+
+
+        <div class="white_card">
+
+        <div class="architecture" id="concept">
+            <h2 class="architecture_text" data-anim="scrub">Архітектура навколо природи Лісників. Обмежена кількість вілл та пентхаусів, терасна забудова і інтеграція в природний ландшафт формують середовище, у якому архітектура не домінує над природою, а стає її продовженням.</h2>
+
+            <div class="architecture_video">
+                <video data-load="critical" data-src="media/LH_arch.webm" autoplay muted loop playsinline data-anim="fade"></video>
+                <p class="architecture_caption" data-anim="fade">Розташований на видових пагорбах в Лісниках</p>
+            </div>
+        </div>
+
+
+        <div class="benefits" id="location">
+            <p class="benefits_label" data-anim="fade">про проект</p>
+            <h2 class="benefits_title" data-anim="lines">Концепція Lion Hills</h2>
+
+            <div class="gallery" data-anim="fade" id="benefits-gallery">
+                <div class="gallery_stage">
+                    <div class="gallery_item active" data-index="0">
+                        <video data-load="critical" data-src="media/LH media/Переваги/Resized &amp; Cropped/Compressed/Location.webm" muted loop playsinline preload="metadata"></video>
+                    </div>
+                    <div class="gallery_item" data-index="1">
+                        <video data-src="media/LH media/Переваги/Resized &amp; Cropped/Compressed/Kraevid.webm" muted loop playsinline preload="metadata"></video>
+                    </div>
+                    <div class="gallery_item" data-index="2">
+                        <video data-src="media/LH media/Переваги/Resized &amp; Cropped/Compressed/Privacy.mp4" muted loop playsinline preload="metadata"></video>
+                    </div>
+                    <div class="gallery_item" data-index="3">
+                        <video data-src="media/LH media/Переваги/Resized &amp; Cropped/Compressed/infrastructure.mp4" muted loop playsinline preload="metadata"></video>
+                    </div>
+                    <button class="gallery_next" aria-label="Наступний слайд"></button>
+                </div>
+
+                <div class="gallery_tabs" role="tablist">
+                    <button class="gallery_tab active" role="tab" data-index="0">Локація</button>
+                    <button class="gallery_tab" role="tab" data-index="1">Краєивиди</button>
+                    <button class="gallery_tab" role="tab" data-index="2">Приватність</button>
+                    <button class="gallery_tab" role="tab" data-index="3">Інфраструктура</button>
+                </div>
+
+                <div class="gallery_captions">
+                    <p class="gallery_caption active" data-index="0"><strong>Локація.</strong> Lion Hills - середовище серед природи, де архітектура стає продовженням ландшафту. Завдяки терасній композиції створюється приватність кожної вілли та відкриваються виняткові краєвиди.</p>
+                    <p class="gallery_caption" data-index="1"><strong>Краєивиди.</strong> Обмежена кількість вілл та пентхаусів у оточенні лісу.</p>
+                    <p class="gallery_caption" data-index="2"><strong>Приватність.</strong> Власні інженерні системи для комфортного життя без залежності від міста.</p>
+                    <p class="gallery_caption" data-index="3"><strong>Інфраструктура.</strong> На території комплексу панує гармонія затишку й натхнення. Серед зелені та світла розташовані простори для активності й релаксу: Спа, спортзал, Infinity pool, ресторан Belkin, Kids Club.</p>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+
+        <div class="clubhouse" id="infrastructure">
+            <p class="clubhouse_label" data-anim="fade">Clubhouse для резидентів та гостей</p>
+            <h2 class="clubhouse_title" data-anim="lines">Простір, який<br>доповнює життя.</h2>
+
+            <div class="carousel" id="clubhouse-carousel">
+                <div class="carousel_track" data-anim="stagger">
+                    <article class="carousel_card">
+                        <img decoding="async" data-load="critical" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_Sauna_WView_Vertical.jpg" alt="">
+                        <h3>SPA комплекс</h3>
+                        <p>Концепція сауни з панорамним вікном на ліс. П'ятниця, тиша і нікуди не потрібно їхати.</p>
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_GymPavillion.jpg" alt="">
+                        <h3>Gym</h3>
+                        <p>Спортивна зала з панорамним вікном на пагорби і ранковий туман.</p>
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_FitnessYogaPavillion.jpg" alt="">
+                        <h3>Yoga space</h3>
+                        <p>Тихий простір над лісом, де ранок починається з практики.</p>
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/girl-back-infinity-pool.jpg" alt="">
+                        <h3>Infinity pool</h3>
+                        <p>Басейн із краєвидом на Голосіївський заповідник на світанку.</p>
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/g5.webp" alt="">
+                        <h3>Kids Club</h3>
+                        <p>Ігри, розваги та час з аніматорами – поруч із домом і під наглядом.</p>
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/Restaurant4.jpg" alt="">
+                        <h3>Ресторан Belkin</h3>
+                        <p>Ресторан із панорамним майданчиком. Сусід, який вже відомий у Києві.</p>
+                    </article>
+                </div>
+
+                <div class="carousel_nav">
+                    <button class="carousel_btn carousel_prev" aria-label="Назад"></button>
+                    <button class="carousel_btn carousel_next" aria-label="Вперед"></button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="white_card white_card_next">
+            <div class="villas" id="villas">
+                <p class="villas_label" data-anim="fade">Колекція вілл</p>
+                <h2 class="villas_title" data-anim="lines">Приватні вілли площею<br>від 251 до 850 м<sup>2</sup></h2>
+                <p class="villas_text" data-anim="fade">Концепція Lion Hills гарантує мешканцям вілл максимальну приватність і гармонію з природою.</p>
+
+                <div class="gallery gallery_villas" data-anim="fade" id="villas-gallery">
+                    <div class="gallery_stage">
+                        <div class="gallery_item active" data-index="0">
+                            <video data-load="critical" data-src="media/LH media/Villas/Compressed/terrace.webm" muted loop playsinline preload="metadata"></video>
+                        </div>
+                        <div class="gallery_item" data-index="1">
+                            <video data-src="media/LH media/Villas/Compressed/privacy.webm" muted loop playsinline preload="metadata"></video>
+                        </div>
+                        <div class="gallery_item" data-index="2">
+                            <video data-src="media/LH media/Villas/Compressed/windows.webm" muted loop playsinline preload="metadata"></video>
+                        </div>
+                        <div class="gallery_item" data-index="3">
+                            <video data-src="media/LH media/Villas/Compressed/parking.webm" muted loop playsinline preload="metadata"></video>
+                        </div>
+                        <button class="gallery_next" aria-label="Наступний слайд"></button>
+                    </div>
+
+                    <div class="gallery_tabs" role="tablist">
+                        <button class="gallery_tab active" role="tab" data-index="0">Тераса</button>
+                        <button class="gallery_tab" role="tab" data-index="1">Приватність</button>
+                        <button class="gallery_tab" role="tab" data-index="2">Вікна</button>
+                        <button class="gallery_tab" role="tab" data-index="3">Паркінг</button>
+                    </div>
+
+                    <div class="gallery_captions">
+                        <p class="gallery_caption active" data-index="0"><strong>Тераса.</strong> Криті тераси інтегровані в архітектуру вілл і навколишній ландшафт. Продумані для використання до дев’яти місяців на рік, вони стають повноцінним простором для сімейних сніданків, вечерь із друзями та відпочинку просто неба.</p>
+                        <p class="gallery_caption" data-index="1"><strong>Приватність.</strong> Приватність кожної вілли забезпечують три архітектурні рішення: терасне розташування будинків на схилі, продумана орієнтація вікон і житлових просторів та ландшафтний дизайн із дорослими крупномірними деревами.</p>
+                        <p class="gallery_caption" data-index="2"><strong>Вікна.</strong> Великоформатні алюмінієві системи Schüco з тонкими профілями відкривають панорамні краєвиди та наповнюють інтер’єри природним світлом. Мультифункціональне енергозберігаюче скло забезпечує комфортний мікроклімат у будь-яку пору року.</p>
+                        <p class="gallery_caption" data-index="3"><strong>Паркінг.</strong> Кожна вілла має власний гараж на два автомобілі та додаткові паркомісця для гостей. Паркувальні простори інтегровані в архітектуру резиденцій, забезпечуючи зручність і приватність щоденного життя.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ready">
+                <div class="ready_box" data-anim="fade">
+                    <video data-load="critical" data-src="media/LH media/Готові юніти/Desktop/Compressed/build1.mp4" autoplay muted loop playsinline></video>
+                    <div class="ready_head">
+                        <h2 class="ready_title" data-anim="lines">Готові окремі вілли та пентхауси</h2>
+                        <p class="ready_label" data-anim="fade">Повна готовність – 2027 рік, можна починати ремонт</p>
+                    </div>
+                    <a class="ready_btn btn-soft" data-anim="fade-only" href="#">Запис на перегляд</a>
+                </div>
+            </div>
+
+            <div class="types">
+                <p class="types_label" data-anim="fade">Колекція вілл Lion Hills</p>
+                <h2 class="types_title" data-anim="lines">Типи планувань</h2>
+
+                <div class="stories">
+                    <div class="stories_slide active">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa1/Desktop/Compressed/villa1.jpg" alt="" style="object-position: center bottom">
+                        <div class="stories_caption">
+                            <h3 class="stories_title">Вілла 251м<sup>2</sup></h3>
+                            <p class="stories_sub">Архітектура простору</p>
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <div class="stories_plan">
+                            <img decoding="async" data-src="media/floorplans/villas/Villa1.png" alt="Планування вілли 251 м²">
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <video class="stories_img" data-src="media/Villa1/Desktop/Compressed/terrace.mp4" muted loop playsinline preload="none"></video>
+                        <p class="stories_text"><span class="stories_mini">Терасса</span>Крита тераса площею близько 45 м² стає природним продовженням вітальні та приватного саду. Тут достатньо простору для великого обіднього столу, лаунж-зони та зустрічей із друзями. Завдяки інтеграції в архітектуру будинку терасою можна користуватися до дев'яти місяців на рік.</p>
+                    </div>
+                    <div class="stories_slide">
+                        <video class="stories_img" data-src="media/Villa1/Desktop/Compressed/rooms.mp4" muted loop playsinline preload="none"></video>
+                        <p class="stories_text"><span class="stories_mini">Кімнати</span>До чотирьох спалень, відкритий простір кухні-вітальні та окремі приватні зони дозволяють адаптувати віллу до потреб родини. Великоформатне скління наповнює кімнати природним світлом, а продумане зонування зберігає відчуття простору та приватності.</p>
+                    </div>
+                    <div class="stories_slide">
+                        <video class="stories_img" data-src="media/Villa1/Desktop/Compressed/parking.mp4" muted loop playsinline preload="none"></video>
+                        <p class="stories_text"><span class="stories_mini">Гараж</span>Вбудований гараж на два автомобілі є частиною архітектури вілли. Паркування організоване в межах приватної резиденції, поєднуючи щоденну зручність із цілісністю архітектурного рішення. Окремо для кожної вілли доступні 2 відкриті паркомісця.</p>
+                    </div>
+                    <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
+                    <button class="stories_next" aria-label="Наступний слайд"></button>
+                    <div class="stories_bar">
+                        <span class="stories_seg active"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                    </div>
+                </div>
+                <div class="stories">
+                    <div class="stories_slide active">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa2/Desktop/Compressed/villa2.jpg" alt="">
+                        <div class="stories_caption">
+                            <h3 class="stories_title">Вілла 255м<sup>2</sup></h3>
+                            <p class="stories_sub">Архітектура світла</p>
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <div class="stories_plan">
+                            <img decoding="async" data-src="media/floorplans/villas/villa2.png" alt="Планування вілли 255 м²">
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <video class="stories_img" data-src="media/Villa2/Desktop/Compressed/architrecture.mp4" muted loop playsinline preload="none"></video>
+                        <p class="stories_text"><span class="stories_mini">Архітектура</span>Лаконічні об'єми, природні матеріали та терасна композиція вписують віллу в рельєф. Архітектура підкреслює світло, простір і зв'язок із навколишнім ландшафтом.</p>
+                    </div>
+                    <div class="stories_slide">
+                        <video class="stories_img" data-src="media/Villa2/Desktop/Compressed/sklo.mp4" muted loop playsinline preload="none"></video>
+                        <p class="stories_text"><span class="stories_mini">Скління</span>Великоформатне панорамне скління з тонкими алюмінієвими профілями наповнює інтер'єри природним світлом і відкриває краєвиди на ліс. Енергозберігаюче скло забезпечує комфортний мікроклімат у будь-яку пору року.</p>
+                    </div>
+                    <div class="stories_slide">
+                        <video class="stories_img" data-src="media/Villa2/Desktop/Compressed/terrace_001.mp4" muted loop playsinline preload="none"></video>
+                        <p class="stories_text"><span class="stories_mini">Тераса</span>Крита тераса стає природним продовженням вітальні та приватного саду. Простір для сімейних сніданків, вечерь із друзями та відпочинку просто неба до дев'яти місяців на рік.</p>
+                    </div>
+                    <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
+                    <button class="stories_next" aria-label="Наступний слайд"></button>
+                    <div class="stories_bar">
+                        <span class="stories_seg active"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                    </div>
+                </div>
+                <div class="stories">
+                    <div class="stories_slide active">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa3/Desktop/Compressed/villa3.jpg" alt="">
+                        <div class="stories_caption">
+                            <h3 class="stories_title">Вілла 255м<sup>2</sup></h3>
+                            <p class="stories_sub">З видом на Лісники</p>
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <div class="stories_plan">
+                            <img decoding="async" data-src="media/floorplans/villas/villa3.png" alt="Планування вілли 255 м² з видом на Лісники">
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <img decoding="async" class="stories_img" data-src="media/Villa3/Desktop/Compressed/terrace.jpg" alt="">
+                        <p class="stories_text"><span class="stories_mini">Терраса</span>Крита тераса стає природним продовженням вітальні та приватного саду. Тут достатньо простору для великого обіднього столу, лаунж-зони та зустрічей із друзями. Завдяки інтеграції в архітектуру будинку терасою можна користуватися до дев'яти місяців на рік.</p>
+                    </div>
+                    <div class="stories_slide">
+                        <img decoding="async" class="stories_img" data-src="media/Villa3/Desktop/Compressed/view.jpg" alt="">
+                        <p class="stories_text"><span class="stories_mini">Види</span>Панорамне скління та приватні простори відкривають краєвиди на навколишній ландшафт і Лісники. Природний рельєф і зелень поруч створюють відчуття життя серед лісу — у 15 хвилинах від центру Києва.</p>
+                    </div>
+                    <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
+                    <button class="stories_next" aria-label="Наступний слайд"></button>
+                    <div class="stories_bar">
+                        <span class="stories_seg active"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                    </div>
+                </div>
+                <div class="stories">
+                    <div class="stories_slide active">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa4/Desktop/Compressed/villa4.jpg" alt="">
+                        <div class="stories_caption">
+                            <h3 class="stories_title">Вілла 450м<sup>2</sup></h3>
+                            <p class="stories_sub">Архітектура вражень</p>
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <div class="stories_plan">
+                            <img decoding="async" data-src="media/floorplans/villas/villa4.png" alt="Планування вілли 450 м²">
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <video class="stories_img" data-src="media/Villa4/Desktop/Compressed/rooms.mp4" muted loop playsinline preload="none"></video>
+                        <p class="stories_text"><span class="stories_mini">Тераса</span>Крита тераса стає природним продовженням вітальні та приватного саду. Простір для великого обіднього столу, лаунж-зони та зустрічей із друзями, яким можна користуватися до дев'яти місяців на рік.</p>
+                    </div>
+                    <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
+                    <button class="stories_next" aria-label="Наступний слайд"></button>
+                    <div class="stories_bar">
+                        <span class="stories_seg active"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                    </div>
+                </div>
+                <div class="stories">
+                    <div class="stories_slide active">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa5/Dekstop/Compressed/villa5.png" alt="">
+                        <div class="stories_caption">
+                            <h3 class="stories_title">Вілла 550м<sup>2</sup></h3>
+                            <p class="stories_sub">Флагманська вілла</p>
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <div class="stories_plan">
+                            <img decoding="async" data-src="media/floorplans/villas/villa5.png" alt="Планування вілли 550 м²">
+                        </div>
+                    </div>
+                    <div class="stories_slide">
+                        <img decoding="async" class="stories_img" data-src="media/Villa5/Dekstop/Compressed/pool.png" alt="">
+                        <p class="stories_text"><span class="stories_mini">Басейн</span>Приватний басейн просто біля дому — серед зелені та з краєвидами на навколишній ландшафт. Місце для ранкового плавання, відпочинку з родиною та літніх вечорів просто неба.</p>
+                    </div>
+                    <div class="stories_slide">
+                        <img decoding="async" class="stories_img" data-src="media/Villa5/Dekstop/Compressed/terrace.png" alt="">
+                        <p class="stories_text"><span class="stories_mini">Тераса</span>Простора крита тераса поєднує вітальню, сад і басейн в єдиний простір. Тут достатньо місця для обіднього столу, лаунж-зони та зустрічей із друзями до дев'яти місяців на рік.</p>
+                    </div>
+                    <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
+                    <button class="stories_next" aria-label="Наступний слайд"></button>
+                    <div class="stories_bar">
+                        <span class="stories_seg active"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                        <span class="stories_seg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="villas villas_cta">
+                <h2 class="villas_title" data-anim="lines">Дізнатись більше<br>про проект</h2>
+                <p class="villas_text" data-anim="fade">Відкрийте для себе Lion Hills ближче — архітектуру, колекцію резиденцій, інфраструктуру та філософію життя в детальній брошурі комплексу.</p>
+                <a class="lots_btn villas_btn btn-soft" data-anim="fade" href="#">Завантажити брошуру</a>
+            </div>
+        </div>
+
+
+        <div class="clubhouse" id="autonomy">
+            <p class="clubhouse_label" data-anim="fade">Автономність та безпека</p>
+            <h2 class="clubhouse_title" data-anim="lines">Все продумано ще<br>на етапі проєктування</h2>
+
+            <div class="carousel">
+                <div class="carousel_track" data-anim="stagger">
+                    <article class="carousel_card">
+                        <img decoding="async" data-load="queue" data-src="media/LH media/Автономність/Compressed/Webp/safe.webp" alt="">
+                        <h3>Safe room</h3>
+                        <p>Кімнату безпеки ми спроектували на мінус першому поверсі, з подвійним залізобетонним перекриттям підвищеної міцності.</p>
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Автономність/Compressed/Webp/nezalezh.webp" alt="">
+                        <h3>Незалежність від мереж</h3>
+                        <p>Кожна вілла Lion Hills має власну свердловину глибиною близько 90 метрів з якісною водою. За очищення стічних вод відповідає індивідуальна станція біологічного очищення. Для максимальної автономності ми провели газопостачання в кожен будинок.</p>
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Автономність/Compressed/Webp/generator2.webp" alt="">
+                        <h3>Автономні системи</h3>
+                        <p>У кожній віллі закладена мережа для підключення генератора, інвертора, акумулятора і сонячних панелей. Це стовідсоткова автономність вашого будинку. При підключенні до зеленого тарифу ви можете забути про рахунки за електроенергію, воду і каналізацію всього будинку.</p>
+                    </article>
+                </div>
+
+                <div class="carousel_nav">
+                    <button class="carousel_btn carousel_prev" aria-label="Назад"></button>
+                    <button class="carousel_btn carousel_next" aria-label="Вперед"></button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="white_card white_card_next">
+            <div class="villas" id="penthouses">
+                <p class="villas_label" data-anim="fade">Колекція пентхаусів</p>
+                <h2 class="villas_title" data-anim="lines">Пентхауси з басейном і<br>видами на Лісники</h2>
+                <p class="villas_text" data-anim="fade">Пентхауси Lion Hills — це поєднання панорамних краєвидів, відкритого простору та витонченої архітектури.</p>
+
+                <div class="gallery gallery_villas" data-anim="fade" id="penthouses-gallery">
+                    <div class="gallery_stage">
+                        <div class="gallery_item active" data-index="0">
+                            <img decoding="async" data-load="queue" data-src="media/LH media/Penthouses/Compressed/Webp/prostir2.jpg" alt="">
+                        </div>
+                        <div class="gallery_item" data-index="1">
+                            <img decoding="async" data-src="media/LH media/Penthouses/Compressed/Webp/kraevid.webp" alt="">
+                        </div>
+                        <div class="gallery_item" data-index="2">
+                            <img decoding="async" data-src="media/LH media/Penthouses/Compressed/Webp/terrace.webp" alt="">
+                        </div>
+                        <div class="gallery_item" data-index="3">
+                            <img decoding="async" data-src="media/LH media/Penthouses/Compressed/Webp/sklinnya.webp" alt="">
+                        </div>
+                        <button class="gallery_next" aria-label="Наступний слайд"></button>
+                    </div>
+
+                    <div class="gallery_tabs" role="tablist">
+                        <button class="gallery_tab active" role="tab" data-index="0">Простір</button>
+                        <button class="gallery_tab" role="tab" data-index="1">Краєвиди</button>
+                        <button class="gallery_tab" role="tab" data-index="2">Тераса</button>
+                        <button class="gallery_tab" role="tab" data-index="3">Скління</button>
+                    </div>
+
+                    <div class="gallery_captions">
+                        <p class="gallery_caption active" data-index="0"><strong>Простір.</strong> Великі площі, відкриті житлові зони та продумані планування створюють відчуття простору, властиве заміській резиденції. Лише два пентхауси на поверсі забезпечують камерність і приватність щоденного життя.</p>
+                        <p class="gallery_caption" data-index="1"><strong>Краєвиди.</strong> Кожен пентхаус спроєктований з терасою та панорамними вікнами, що стирають межу між інтерʼєром і природою.</p>
+                        <p class="gallery_caption" data-index="2"><strong>Тераса.</strong> Кожен пентхаус має приватну терасу площею від 60 м² із виходом із кожної кімнати та власним квітучим садом. Простір для ранкової йоги, сніданків із видом на ліс, затишних вечерь і відпочинку серед природи — просто неба, у власному ритмі.</p>
+                        <p class="gallery_caption" data-index="3"><strong>Скління.</strong> Великоформатне панорамне скління з тонкими алюмінієвими профілями відкриває краєвиди на навколишній ландшафт і наповнює інтер'єри природним світлом. Мультифункціональне енергозберігаюче скло забезпечує комфортний мікроклімат, зберігаючи візуальний зв'язок із природою.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lots">
+                <div class="lots_head">
+                    <div>
+                        <p class="lots_label" data-anim="fade">Лоти квартир</p>
+                        <h2 class="lots_title" data-anim="lines">Обери свою квартиру</h2>
+                    </div>
+                    <a class="lots_btn btn-soft" data-anim="fade" href="#">Завантажити планування</a>
+                </div>
+
+                <div class="carousel">
+                    <div class="carousel_track" data-anim="stagger">
+                        <article class="carousel_card lot_card" data-anim="count">
+                            <div class="lot_plan"><img decoding="async" data-load="queue" data-src="media/floorplans/penthouse/webp/floorplan-1.webp" alt="Планування пентхауса"></div>
+                            <h3 class="lot_main">123 м<sup>2</sup><br>3 спальні</h3>
+                            <p class="lot_terrace">50 м<sup>2</sup> терраса</p>
+                        </article>
+                        <article class="carousel_card lot_card" data-anim="count">
+                            <div class="lot_plan"><img decoding="async" data-src="media/floorplans/penthouse/webp/floorplan-2.webp" alt="Планування пентхауса"></div>
+                            <h3 class="lot_main">123 м<sup>2</sup><br>3 спальні</h3>
+                            <p class="lot_terrace">50 м<sup>2</sup> терраса</p>
+                        </article>
+                        <article class="carousel_card lot_card" data-anim="count">
+                            <div class="lot_plan"><img decoding="async" data-src="media/floorplans/penthouse/webp/floorplan-3.webp" alt="Планування пентхауса"></div>
+                            <h3 class="lot_main">123 м<sup>2</sup><br>3 спальні</h3>
+                            <p class="lot_terrace">50 м<sup>2</sup> терраса</p>
+                        </article>
+                        <article class="carousel_card lot_card" data-anim="count">
+                            <div class="lot_plan"><img decoding="async" data-src="media/floorplans/penthouse/webp/floorplan-4.webp" alt="Планування пентхауса"></div>
+                            <h3 class="lot_main">98 м<sup>2</sup><br>2 спальні</h3>
+                            <p class="lot_terrace">32 м<sup>2</sup> терраса</p>
+                        </article>
+                    </div>
+
+                    <div class="carousel_nav">
+                        <button class="carousel_btn carousel_prev" aria-label="Назад"></button>
+                        <button class="carousel_btn carousel_next" aria-label="Вперед"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ready">
+                <div class="ready_box" data-anim="fade">
+                    <video data-load="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build2.mp4" autoplay muted loop playsinline></video>
+                    <div class="ready_head">
+                        <p class="ready_label" data-anim="fade">Готовність комплексу</p>
+                        <h2 class="ready_title" data-anim="lines">2027 рік</h2>
+                    </div>
+                    <a class="ready_btn btn-soft" data-anim="fade-only" href="#">Запис на перегляд</a>
+                </div>
+            </div>
+
+            <div class="build" id="build">
+                <p class="clubhouse_label" data-anim="fade">Будівництво</p>
+                <h2 class="clubhouse_title" data-anim="lines">Етапи готовності</h2>
+
+                <div class="carousel">
+                    <div class="carousel_track" data-anim="stagger">
+                    <article class="carousel_card">
+                        <img decoding="async" data-load="queue" data-src="media/LH media/Build/Compressed/DJI_0346_ (1).webp" alt="">
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Build/Compressed/DJI_0383.webp" alt="">
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Build/Compressed/DJI_0396.webp" alt="">
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Build/Compressed/DJI_0431.webp" alt="">
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Build/Compressed/DJI_0449.webp" alt="">
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Build/Compressed/DJI_0450.webp" alt="">
+                    </article>
+                    <article class="carousel_card">
+                        <img decoding="async" data-src="media/LH media/Build/Compressed/photo_2026-10-23_11-09-18.jpg" alt="">
+                    </article>
+                    </div>
+
+                    <div class="carousel_nav">
+                        <button class="carousel_btn carousel_prev" aria-label="Назад"></button>
+                        <button class="carousel_btn carousel_next" aria-label="Вперед"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq" id="faq">
+                <p class="villas_label" data-anim="fade">про проект</p>
+                <h2 class="villas_title" data-anim="lines">Більше інформації про<br>проект Lion Hills</h2>
+
+                <div class="faq_links" data-anim="fade">
+                    <a class="faq_link btn-soft faq_link_pdf" href="#">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                            <path d="M3.5 1.5h6l3 3v10h-9z"/>
+                            <path d="M9.5 1.5v3h3M8 7v5M6 10l2 2 2-2"/>
+                        </svg>
+                        PDF презентація
+                    </a>
+                    <a class="faq_link btn-soft faq_link_ig" href="#">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                            <rect x="1.5" y="1.5" width="13" height="13" rx="3.5"/>
+                            <circle cx="8" cy="8" r="3"/>
+                            <circle cx="11.8" cy="4.2" r="0.5" fill="currentColor" stroke="none"/>
+                        </svg>
+                        Наш інстаграм
+                    </a>
+                </div>
+
+                <div class="faq_list" data-anim="stagger">
+                    <div class="faq_item is-open">
+                        <button class="faq_question" type="button" aria-expanded="true">
+                            Як доїхати від траси до проекту?
+                            <span class="faq_chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="faq_answer"><div><p>У центрі Lion Hills розташований Private Clubhouse — закритий простір для резидентів та гостей комплексу.</p></div></div>
+                    </div>
+                    <div class="faq_item">
+                        <button class="faq_question" type="button" aria-expanded="false">
+                            Чи можна запросити зміну планування?
+                            <span class="faq_chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="faq_answer"><div><p>У центрі Lion Hills розташований Private Clubhouse — закритий простір для резидентів та гостей комплексу.</p></div></div>
+                    </div>
+                    <div class="faq_item">
+                        <button class="faq_question" type="button" aria-expanded="false">
+                            Як відбувається оплата?
+                            <span class="faq_chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="faq_answer"><div><p>У центрі Lion Hills розташований Private Clubhouse — закритий простір для резидентів та гостей комплексу.</p></div></div>
+                    </div>
+                    <div class="faq_item">
+                        <button class="faq_question" type="button" aria-expanded="false">
+                            Як дізнатись який вид у кожного юніту?
+                            <span class="faq_chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="faq_answer"><div><p>У центрі Lion Hills розташований Private Clubhouse — закритий простір для резидентів та гостей комплексу.</p></div></div>
+                    </div>
+                    <div class="faq_item">
+                        <button class="faq_question" type="button" aria-expanded="false">
+                            Через скільки часу після будівництва можна заїхати?
+                            <span class="faq_chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="faq_answer"><div><p>У центрі Lion Hills розташований Private Clubhouse — закритий простір для резидентів та гостей комплексу.</p></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="outro">Життя на висоті<br>у Лісниках</p>
+
+            <footer class="footer">
+                <div class="footer_main">
+                    <div class="footer_about">
+                        <a class="footer_logo" href="#">Lion Hills</a>
+                        <p class="footer_text">Будівництво триває.<br><span>Запишись на перегляд вже сьогодні</span></p>
+                        <form class="footer_form">
+                            <input class="footer_input" type="tel" name="phone" placeholder="Номер телефону" autocomplete="tel" required>
+                            <button class="footer_submit" type="submit">Відправити</button>
+                        </form>
+                        <p class="footer_note">*Я згоден з правилами обробки персональних даних</p>
+                    </div>
+                    <div class="footer_col">
+                        <p class="footer_label">Контакти</p>
+                        <a href="tel:+380632263062">+380 (63) 226 30 62</a>
+                        <a href="mailto:lionhillsvillas@gmail.com">lionhillsvillas@gmail.com</a>
+                    </div>
+                    <div class="footer_col footer_social">
+                        <p class="footer_label">Соц. мережі</p>
+                        <a href="#">Instagram</a>
+                        <a href="#">Whatsapp</a>
+                        <a href="#">Telegram</a>
+                    </div>
+                </div>
+                <div class="footer_bottom">
+                    <p>Lion Hills 2026, All rights reserved</p>
+                    <p><a href="#">Privacy Policy</a> / <a href="#">Cookies policy</a></p>
+                </div>
+            </footer>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+    <script src="scripts.js"></script>
+    <script src="animations.js"></script>
+</body>
+</html>
