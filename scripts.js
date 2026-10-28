@@ -191,20 +191,13 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
     });
 
     // Autoplay the first video just before the gallery edge enters the screen:
-    // iOS shows a not-yet-played video as a black box
-    // after that the current video only plays while the gallery is on screen
+    // iOS shows a not-yet-played video as a black box. From then on it just loops
     var started = false;
     new IntersectionObserver(function (entries) {
-        var on = entries[0].isIntersecting;
-        if (on && !started) {
+        if (entries[0].isIntersecting && !started) {
             started = true;
             show(0);
-            return;
         }
-        var video = started && currentVideo();
-        if (!video) return;
-        if (on) video.play().catch(function () {});
-        else video.pause();
     }, { rootMargin: '0px 0px 15% 0px' }).observe(gallery);
 });
 
@@ -280,14 +273,9 @@ document.querySelectorAll('.stories').forEach(function (root) {
         seg.addEventListener('click', function () { show(i); });
     });
 
-    // The progress bar and the slide's video only run while the block is on screen
+    // The progress bar only runs while the block is on screen
     new IntersectionObserver(function (entries) {
-        var on = entries[0].isIntersecting;
-        root.classList.toggle('in_view', on);
-        var v = slides[current].querySelector('video');
-        if (!v) return;
-        if (on) v.play().catch(function () {});
-        else v.pause();
+        root.classList.toggle('in_view', entries[0].isIntersecting);
     }, { threshold: 0.5 }).observe(root);
 
     var nearObserver = new IntersectionObserver(function (entries) {
@@ -323,27 +311,6 @@ document.querySelectorAll('.stories').forEach(function (root) {
         });
     }, { rootMargin: '100% 0px' });
     obs.observe(first);
-})();
-
-// Autoplay videos (architecture, build1/2) only play while on screen. iOS stops offscreen videos and,
-// with many videos on the page, can drop their frames and not restart them (a blank box on the way back)
-(function () {
-    var watch = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-            var v = e.target;
-            v.onScreen = e.isIntersecting;
-            if (!e.isIntersecting) { v.pause(); return; }
-            if (!v.getAttribute('src')) return; // not loaded yet: the autoplay attribute starts it
-            // dropped by the browser (no data and not loading): fetch it again
-            if (v.error || (v.readyState === 0 && v.networkState !== v.NETWORK_LOADING)) v.load();
-            v.play().catch(function () {});
-        });
-    });
-    document.querySelectorAll('video[autoplay]').forEach(function (v) {
-        watch.observe(v);
-        // the autoplay attribute starts it as soon as its src is set, wherever it is
-        v.addEventListener('playing', function () { if (!v.onScreen) v.pause(); });
-    });
 })();
 
 // Pill header: shows up once the hero has scrolled out of view, expands into the menu

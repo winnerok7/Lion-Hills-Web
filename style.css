@@ -2559,10 +2559,19 @@ html.is-loading .hero {
         justify-content: space-between;
     }
 
+    /* socials first, contacts second (the long email gets the wider column) */
     .footer_main {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 48px 24px;
+        grid-template-columns: auto 1fr;
+        gap: 48px 48px;
+    }
+
+    .footer_social {
+        order: 1;
+    }
+
+    .footer_col:not(.footer_social) {
+        order: 2;
     }
 
     .footer_about {
@@ -2599,6 +2608,7 @@ html.is-loading .hero {
     }
 
     .footer_bottom p {
+        align-self: flex-start;
         font-size: 14px;
     }
 }

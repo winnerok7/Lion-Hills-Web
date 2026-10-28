@@ -293,10 +293,12 @@
 
     // Villa banners behave like full-screen steps: one wheel gesture moves exactly one banner,
     // fast scrolling chains the banners one after another, and the ends of the group are free to leave.
-    // first white card grows 0.97 -> 1 as it comes up over the hero (scrubbed)
+    // first white card grows 0.97 -> 1 as it comes up over the hero (scrubbed).
+    // Not on mobile: iOS Safari stops painting the architecture video inside this clipped, rounded card
+    // while its transform changes (blank box after scrolling back up); 2% isn't visible on a phone anyway
     function firstCardScale() {
         var card = document.querySelector('.white_card:not(.white_card_next)');
-        if (!card) return;
+        if (!card || isMobile) return;
         gsap.fromTo(card,
             { scale: 0.98, transformOrigin: '50% 0%' },
             {
