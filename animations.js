@@ -2,10 +2,16 @@
     var root = document.documentElement;
     var loader = document.getElementById('loader');
 
+    // scripts.js holds the rest of the media on mobile until the loader text is over
+    function loaderDone() {
+        window.dispatchEvent(new Event('loader:done'));
+    }
+
     // no GSAP (CDN failed) or reduced motion: drop the loader and show the page as is
     function bail() {
         if (loader) loader.remove();
         root.classList.remove('is-loading', 'js-anim');
+        loaderDone();
     }
     if (!window.gsap || !window.ScrollTrigger || !window.SplitText) return bail();
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return bail();
@@ -185,11 +191,11 @@
                 if (held) return; // resuming can pass this point again
                 held = true;
                 tl.pause();
-                ready.then(function () { toTop(); addHero(); tl.play(); });
+                ready.then(function () { toTop(); addHero(); tl.play(); loaderDone(); });
             }, null, 'reveal');
         } else {
             tl.pause();
-            ready.then(function () { addHero(); tl.play(); });
+            ready.then(function () { addHero(); tl.play(); loaderDone(); });
         }
     }
 

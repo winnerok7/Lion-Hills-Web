@@ -4,7 +4,8 @@
 //    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero)
 // 2) queue: [data-load="queue"] one by one in page order (first slide of the other sliders, build2)
 // 3) the rest: gallery/carousel slides once their block is about a screen away; stories load current + next slide
-// On mobile data-load-mobile overrides data-load (shorter critical set, so the loader is quicker)
+// On mobile data-load-mobile overrides data-load: critical is only fonts + hero photo (iOS doesn't buffer
+// videos that aren't playing, so the loader would hang on them), and the rest waits for the loader to end
 
 var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
 var isMobile = window.matchMedia('(max-width: 767px)').matches;
@@ -96,8 +97,16 @@ function whenLoaded(el, max) {
     };
 })();
 
+// mobile: nothing else loads while the loader text animates, so it stays smooth;
+// animations.js fires 'loader:done' when the hero curtain starts (or when there is no loader)
+var loaderDone = new Promise(function (resolve) {
+    if (!isMobile || !document.documentElement.classList.contains('is-loading')) return resolve();
+    window.addEventListener('loader:done', function () { resolve(); }, { once: true });
+    setTimeout(resolve, CRITICAL_MAX + 5000); // animations.js failed
+});
+
 (function () {
-    window.criticalReady.then(function () {
+    Promise.all([window.criticalReady, loaderDone]).then(function () {
         var queue = loadGroup('queue');
         (function next() {
             var el = queue.shift();
@@ -122,7 +131,9 @@ function whenLoaded(el, max) {
             loadMediaIn(e.target);
         });
     }, { rootMargin: '100% 0px' });
-    roots.forEach(function (root) { near.observe(root); });
+    loaderDone.then(function () {
+        roots.forEach(function (root) { near.observe(root); });
+    });
 })();
 
 
@@ -323,10 +334,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
     }
 
     toggle.addEventListener('click', function () { setOpen(!open); });
-    // on desktop the hero button opens the glass drawer instead (see below)
-    if (heroMenu) heroMenu.addEventListener('click', function () {
-        if (window.innerWidth <= 767) setOpen(true);
-    });
+    // the hero button opens the glass drawer instead (see below)
 
     // menu anchors: close, then glide to the section under the pill (on mobile the pill is at the bottom)
     panel.querySelectorAll('a[href^="#"]').forEach(function (a) {
@@ -384,7 +392,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
     update();
 })();
 
-// Hero menu on desktop: glass drawer with Kyiv time and date
+// Hero menu: glass drawer with Kyiv time and date
 (function () {
     var drawer = document.querySelector('.drawer');
     var heroMenu = document.querySelector('.header_menu');
@@ -422,9 +430,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
 
     heroMenu.setAttribute('aria-controls', 'hero-menu');
     heroMenu.setAttribute('aria-expanded', 'false');
-    heroMenu.addEventListener('click', function () {
-        if (window.innerWidth > 767) setOpen(!open);
-    });
+    heroMenu.addEventListener('click', function () { setOpen(!open); });
     drawer.querySelectorAll('.drawer_handle, .drawer_close').forEach(function (el) {
         el.addEventListener('click', function () { setOpen(false); });
     });
@@ -435,7 +441,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
         a.addEventListener('click', function (e) {
             e.preventDefault();
             setOpen(false);
-            if (window.lenis) window.lenis.scrollTo(target, { offset: -110 });
+            if (window.lenis) window.lenis.scrollTo(target, { offset: window.innerWidth <= 767 ? -20 : -110 });
             else target.scrollIntoView({ behavior: 'smooth' });
         });
     });
@@ -446,7 +452,6 @@ document.querySelectorAll('.stories').forEach(function (root) {
     document.addEventListener('click', function (e) {
         if (open && !drawer.contains(e.target) && !heroMenu.contains(e.target)) setOpen(false);
     });
-    window.addEventListener('resize', function () { if (open && window.innerWidth <= 767) setOpen(false); });
 })();
 
 // FAQ accordion: one answer open at a time
