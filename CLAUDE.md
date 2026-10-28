@@ -1,6 +1,6 @@
 # Lion Hills — быстрая дока
 
-Одностраничный промо-лендинг ЖК **Lion Hills** (виллы и пентхаусы, Лісники, Київ). Тексты на **украинском** (`lang="ru"` в html — неточность). Статика без сборки: открывается `index.html` напрямую или любым static-сервером. Не git-репозиторий.
+Одностраничный промо-лендинг ЖК **Lion Hills** (виллы и пентхаусы, Лісники, Київ). Тексты на **украинском** (`lang="ru"` в html — неточность). Статика без сборки: открывается `index.html` напрямую или любым static-сервером. Git-репозиторий (ветка `main`), деплой — lionhillsweb.vercel.app.
 
 ## Файлы
 | Файл | Что внутри |
@@ -11,7 +11,7 @@
 | `animations.js` | GSAP 3.13 + ScrollTrigger + SplitText + Lenis (CDN в конце index.html). `intro()` — лоадер + шторка hero (стартует сразу); `init()` — scroll-эффекты после `fonts.ready` (макс. 2с). Ещё `footerReveal()` и `setupSnap()`. Lenis отдаётся в `window.lenis` (для якорей меню). |
 | `variants/cards-v2/` | Сохранённый альтернативный `animations.js` (другой snap). Старый: без `intro()`/лоадера и `footerReveal` — поверх не копировать. |
 | `fonts/` | Aeonik Pro (400/500/900) — основной; PP Hatton 500 — акцентный (лого). |
-| `media/` | Фото/видео. Пробелы и кириллица в путях. На сайте используются **сжатые** версии: `LH media/<раздел>/Compressed/` (картинки Penthouses/Автономність — из `Compressed/Webp/`, Внутрішня інфр — из `Compressed/Webp 2/` (там в основном `.jpg`), видео `Villas` — `.webm`), Переваги — `Переваги/Resized & Cropped/Compressed/` (в HTML `&amp;`), build1/2 — `Готові юніти/Desktop/Compressed/`, hero — `hero2_compressed.jpg`. Медиа вилл — `VillaN/Desktop/` (у Villa5 папка `Dekstop`), фото и видео сторис — из `VillaN/Desktop/Compressed/` (у Villa5 — `Dekstop/Compressed/`), мобильные версии будут отдельно. Оригиналы лежат рядом, на сайт не подключены. |
+| `media/` | Фото/видео. Пробелы и кириллица в путях. На сайте используются **сжатые** версии: `LH media/<раздел>/Compressed/` (картинки Penthouses/Автономність — из `Compressed/Webp/`, Внутрішня інфр — из `Compressed/Webp 2/` (там в основном `.jpg`), видео `Villas` — `.webm`), Переваги — `Переваги/Resized & Cropped/Compressed/` (в HTML `&amp;`), build1/2 — `Готові юніти/Desktop/Compressed/`, hero — `hero2_compressed.jpg` (мобилка — `hero_mob.JPG`, регистр расширения важен на Vercel). Медиа вилл — `VillaN/Desktop/` (у Villa5 папка `Dekstop`), фото и видео сторис — из `VillaN/Desktop/Compressed/` (у Villa5 — `Dekstop/Compressed/`), мобильные версии будут отдельно. Оригиналы лежат рядом, на сайт не подключены. |
 
 ## Порядок секций (index.html)
 1. `.hero` — `.hero_media` (фото фоном, отдельный слой для параллакса), хедер (лого, телефон, «Меню»), заголовок, «Лісники, Київ», белая кнопка «Запис на перегляд»
@@ -28,7 +28,8 @@
 
 ## Загрузка медиа
 Все `<img>`/`<video>` ниже hero — с `data-src` вместо `src` (без `src` новые медиа не добавлять: загрузит только код из `scripts.js`, блок «Media loading»).
-1. **Критичное** (грузится во время лоадера, параллельно) — `<link rel="preload">` в `<head>`: Aeonik Pro Regular + Medium, `hero2_compressed.jpg`; плюс `data-load="critical"`: `LH_arch.webm`, 1-й слайд «Концепції» (`Location.webm`), 1-я карточка клабхауса (SPA), 1-е видео галереи вилл (`terrace.webm`), `build1.mp4`, обложки 5 сторис вилл (картинки ещё и `decode()`). Видео — до `canplaythrough`. `window.criticalReady` + `window.loadProgress()` (0..1), общий лимит `CRITICAL_MAX` = 15с.
+1. **Критичное** (грузится во время лоадера, параллельно) — `<link rel="preload">` в `<head>`: Aeonik Pro Regular + Medium, `hero2_compressed.jpg` / на мобилке `hero_mob.JPG` (через `media`); плюс `data-load="critical"`: `LH_arch.webm`, 1-й слайд «Концепції» (`Location.webm`), 1-я карточка клабхауса (SPA), 1-е видео галереи вилл (`terrace.webm`), `build1.mp4`, обложки 5 сторис вилл (картинки ещё и `decode()`). Видео — до `canplaythrough`. `window.criticalReady` + `window.loadProgress()` (0..1), общий лимит `CRITICAL_MAX` = 15с.
+   - На мобилке `data-load-mobile` переопределяет `data-load` (`loadGroup()` в `scripts.js`): `build1.mp4` и обложки вилл там `queue`, т.е. критичное заканчивается на `terrace.webm`.
 2. **Очередь** — `data-load="queue"`, по одному в порядке страницы после `criticalReady`: первый слайд остальных `.gallery` / `.carousel`, `build2`. Следующий файл — после `canplaythrough`/`load` (или 10с).
 3. **Остальное** — слайды `.gallery`/`.carousel` целиком, когда блок в ~1 экране (`rootMargin: 100%`); `.stories` сами грузят текущий + следующий слайд (с `preload='auto'`), когда рядом; плюс когда первая вилла в ~1 экране, все слайды всех вилл грузятся фоном по одному по порядку. Клик по вкладке галереи подгружает её сразу.
 - Inter (Google Fonts) удалён — не использовался. PP Hatton не в preload (только лого).
@@ -50,6 +51,8 @@
 - Комментарии короткие, на английском.
 - Кнопки-CTA: класс `.btn-soft` + свой класс для цвета/позиции. Цвет фона — через `--btn-bg`. Hover: `scale: 0.95` (свойство `scale`, не `transform`). Углы — `corner-shape: superellipse(1.5)`, без поддержки радиус ×0.752.
 - Мобилка: breakpoint 767px и в CSS, и в JS (`isMobile`). На мобилке `.drawer` скрыт, кнопка «Меню» в hero открывает плавающую пилюлю (своё мобильное меню — TODO).
+- Мобилка: пилюля `.sticky_header` внизу экрана (как плавающий футер), на 10% меньше (бар 60px), меню раскрывается вверх (`column-reverse`); `.plan_download` над ней, `.sticky_fade` внизу (перевёрнут `scaleY(-1)`, цвет берётся по нижнему краю экрана). Телефона в hero нет. Hero = `100lvh + 5vh + 20px` (белая карточка начинается за краем экрана), кнопка привязана к `svh`.
+- Галереи запускают первое видео, когда край блока подходит к экрану (iOS показывает ещё не запущенное видео чёрным).
 
 ## Известные нюансы / TODO
 - Заглушки `href="#"`: брошюра, PDF, планировки виллы, WhatsApp, соцсети, политики, «Запис на перегляд». Форма футера никуда не отправляет.

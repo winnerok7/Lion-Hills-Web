@@ -7,7 +7,8 @@
     <!-- critical for the loader: its text font, % counter font and the hero photo; all other media goes through scripts.js -->
     <link rel="preload" href="fonts/AeonikPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="fonts/AeonikPro-Medium.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="media/hero2_compressed.jpg" as="image" fetchpriority="high">
+    <link rel="preload" href="media/hero2_compressed.jpg" as="image" fetchpriority="high" media="(min-width: 768px)">
+    <link rel="preload" href="media/hero_mob.JPG" as="image" fetchpriority="high" media="(max-width: 767px)">
     <link rel="stylesheet" href="style.css">
     <script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.classList.add("js-anim","is-loading");if("scrollRestoration" in history)history.scrollRestoration="manual"}</script>
 </head>
@@ -277,7 +278,7 @@
 
             <div class="ready">
                 <div class="ready_box" data-anim="fade">
-                    <video data-load="critical" data-src="media/LH media/Готові юніти/Desktop/Compressed/build1.mp4" autoplay muted loop playsinline></video>
+                    <video data-load="critical" data-load-mobile="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build1.mp4" autoplay muted loop playsinline></video>
                     <div class="ready_head">
                         <h2 class="ready_title" data-anim="lines">Готові окремі вілли та пентхауси</h2>
                         <p class="ready_label" data-anim="fade">Повна готовність – 2027 рік, можна починати ремонт</p>
@@ -292,7 +293,7 @@
 
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa1/Desktop/Compressed/villa1.jpg" alt="" style="object-position: center bottom">
+                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Villa1/Desktop/Compressed/villa1.jpg" alt="" style="object-position: center bottom">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 251м<sup>2</sup></h3>
                             <p class="stories_sub">Архітектура простору</p>
@@ -327,7 +328,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa2/Desktop/Compressed/villa2.jpg" alt="">
+                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Villa2/Desktop/Compressed/villa2.jpg" alt="">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 255м<sup>2</sup></h3>
                             <p class="stories_sub">Архітектура світла</p>
@@ -362,7 +363,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa3/Desktop/Compressed/villa3.jpg" alt="">
+                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Villa3/Desktop/Compressed/villa3.jpg" alt="">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 255м<sup>2</sup></h3>
                             <p class="stories_sub">З видом на Лісники</p>
@@ -392,7 +393,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa4/Desktop/Compressed/villa4.jpg" alt="">
+                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Villa4/Desktop/Compressed/villa4.jpg" alt="">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 450м<sup>2</sup></h3>
                             <p class="stories_sub">Архітектура вражень</p>
@@ -417,7 +418,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Villa5/Dekstop/Compressed/villa5.png" alt="">
+                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Villa5/Dekstop/Compressed/villa5.png" alt="">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 550м<sup>2</sup></h3>
                             <p class="stories_sub">Флагманська вілла</p>

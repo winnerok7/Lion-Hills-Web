@@ -4,8 +4,18 @@
 //    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero)
 // 2) queue: [data-load="queue"] one by one in page order (first slide of the other sliders, build2)
 // 3) the rest: gallery/carousel slides once their block is about a screen away; stories load current + next slide
+// On mobile data-load-mobile overrides data-load (shorter critical set, so the loader is quicker)
 
 var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
+var isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+// [data-load] elements of one group, in page order
+function loadGroup(name) {
+    return Array.prototype.filter.call(document.querySelectorAll('[data-load]'), function (el) {
+        var group = isMobile && el.getAttribute('data-load-mobile') || el.getAttribute('data-load');
+        return group === name;
+    });
+}
 
 function loadMedia(el) {
     var src = el && el.getAttribute('data-src');
@@ -61,7 +71,7 @@ function whenLoaded(el, max) {
 
     // all at once, in parallel with the hero; a video counts by how much of it is buffered;
     // images are decoded up front too, so big ones (villa covers) don't stutter when scrolled to
-    document.querySelectorAll('[data-load="critical"]').forEach(function (el) {
+    loadGroup('critical').forEach(function (el) {
         if (el.tagName === 'VIDEO') el.preload = 'auto';
         loadMedia(el);
         var usable = whenLoaded(el, CRITICAL_MAX).then(function () {
@@ -88,7 +98,7 @@ function whenLoaded(el, max) {
 
 (function () {
     window.criticalReady.then(function () {
-        var queue = Array.prototype.slice.call(document.querySelectorAll('[data-load="queue"]'));
+        var queue = loadGroup('queue');
         (function next() {
             var el = queue.shift();
             if (!el) return;
@@ -156,14 +166,15 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         show(i);
     });
 
-    // Autoplay the first video when the gallery scrolls into view
+    // Autoplay the first video just before the gallery edge enters the screen:
+    // iOS shows a not-yet-played video as a black box
     var started = false;
     new IntersectionObserver(function (entries) {
         if (entries[0].isIntersecting && !started) {
             started = true;
             show(0);
         }
-    }, { threshold: 0.4 }).observe(gallery);
+    }, { rootMargin: '0px 0px 15% 0px' }).observe(gallery);
 });
 
     document.querySelectorAll(".carousel").forEach(function (root) {
@@ -289,7 +300,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
     var barLinks = bar.querySelectorAll('.sticky_header_bar a, .sticky_header_bar button');
     var panelLinks = panel.querySelectorAll('a');
     var heroMenu = document.querySelector('.header_menu');
-    var CLOSED = 66;
+    var barRow = bar.querySelector('.sticky_header_bar'); // its height = closed pill (66px, 60px on mobile)
     var pastHero = false;
     var open = false;
 
@@ -300,7 +311,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
         document.documentElement.classList.toggle('menu-open', open);
         bar.setAttribute('aria-hidden', show ? 'false' : 'true');
         toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        bar.style.height = open ? (CLOSED + panel.offsetHeight) + 'px' : '';
+        bar.style.height = open ? (barRow.offsetHeight + panel.offsetHeight) + 'px' : '';
         barLinks.forEach(function (el) { el.tabIndex = show ? 0 : -1; });
         panelLinks.forEach(function (el) { el.tabIndex = open ? 0 : -1; });
     }
@@ -317,14 +328,14 @@ document.querySelectorAll('.stories').forEach(function (root) {
         if (window.innerWidth <= 767) setOpen(true);
     });
 
-    // menu anchors: close, then glide to the section under the pill
+    // menu anchors: close, then glide to the section under the pill (on mobile the pill is at the bottom)
     panel.querySelectorAll('a[href^="#"]').forEach(function (a) {
         var target = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href'));
         if (!target) return;
         a.addEventListener('click', function (e) {
             e.preventDefault();
             setOpen(false);
-            if (window.lenis) window.lenis.scrollTo(target, { offset: -110 });
+            if (window.lenis) window.lenis.scrollTo(target, { offset: window.innerWidth <= 767 ? -20 : -110 });
             else target.scrollIntoView({ behavior: 'smooth' });
         });
     });
@@ -465,7 +476,8 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
     });
 });
 
-// Header veil: match the color of whatever is under the top edge (white card vs dark sections)
+// Header veil: match the color of whatever is under the pill's edge (white card vs dark sections);
+// top edge on desktop, bottom edge on mobile where the pill floats at the bottom
 (function () {
     var fade = document.querySelector('.sticky_fade');
     if (!fade || !document.elementsFromPoint) return;
@@ -475,7 +487,8 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
 
     function update() {
         ticking = false;
-        var stack = document.elementsFromPoint(window.innerWidth / 2, 2);
+        var y = window.innerWidth <= 767 ? window.innerHeight - 2 : 2;
+        var stack = document.elementsFromPoint(window.innerWidth / 2, y);
         var el = null;
         for (var i = 0; i < stack.length; i++) {
             if (!stack[i].closest(SKIP)) { el = stack[i]; break; }

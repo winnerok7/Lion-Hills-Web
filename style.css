@@ -1911,7 +1911,7 @@ html.is-loading .hero {
     }
 
     .header_phone {
-        font-size: 15px;
+        display: none;
     }
 
     .header_burger {
@@ -1919,14 +1919,63 @@ html.is-loading .hero {
         height: 12px;
     }
 
+    /* pill floats at the bottom, 10% smaller; the menu opens upwards above the bar */
     .sticky_header {
-        top: 16px;
-        width: calc(100% - 32px);
-        max-width: 440px;
+        top: auto;
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column-reverse;
+        width: calc((100% - 32px) * 0.9);
+        max-width: 396px;
+        height: 60px;
+        border-radius: 30px;
+        transform: translate(-50%, 24px);
+    }
+
+    .sticky_header.is-open {
+        border-radius: 24px;
+    }
+
+    .sticky_header_bar {
+        flex-shrink: 0;
+        height: 60px;
+        padding: 0 10px 0 23px;
+    }
+
+    .sticky_header_logo {
+        font-size: 15px;
+    }
+
+    .sticky_header_menu {
+        gap: 17px;
+        font-size: 14.5px;
+    }
+
+    .sticky_header_icon,
+    .sticky_header_burger {
+        width: 21px;
+        height: 14px;
+    }
+
+    .sticky_header_close {
+        width: 13px;
+        height: 13px;
+    }
+
+    .sticky_header_wa {
+        width: 40px;
+        height: 40px;
+        margin-left: 16px;
+    }
+
+    .sticky_header_wa svg {
+        width: 22px;
+        height: 22px;
     }
 
     .sticky_header_panel {
-        padding: 36px 20px 22px;
+        flex-shrink: 0;
+        padding: 26px 18px 30px;
     }
 
     /* mobile gets its own menu */
@@ -1950,12 +1999,19 @@ html.is-loading .hero {
         margin-left: -6px;
     }
 
+    /* above the bottom pill */
     .plan_download {
-        top: 90px;
+        top: auto;
+        bottom: calc(86px + env(safe-area-inset-bottom));
+        transform: translate(-50%, 12px);
     }
 
+    /* veil sits at the bottom behind the pill (flipped, so the mask fades upwards) */
     .sticky_fade {
+        top: auto;
+        bottom: 0;
         height: 80px;
+        transform: scaleY(-1);
     }
 
     .loader_text {
@@ -1976,13 +2032,20 @@ html.is-loading .hero {
         display: none;
     }
 
+    /* full screen incl. the area behind the browser bars (lvh), so the white card starts below the screen edge */
     .hero {
-        height: 100svh;
+        height: calc(105vh + 20px);
+        height: calc(100lvh + 5vh + 20px);
         min-height: 560px;
+    }
+
+    .hero_media {
+        background-image: url('media/hero_mob.JPG');
     }
 
     .hero_content {
         top: 18%;
+        top: 18svh;
         padding: 0 16px;
     }
 
@@ -1996,8 +2059,10 @@ html.is-loading .hero {
         font-size: 18px;
     }
 
+    /* same spot on screen as before: 5vh + 24px above the bottom of the small viewport */
     .hero_btn {
-        bottom: calc(5vh + 24px);
+        bottom: calc(10vh + 44px);
+        bottom: calc(100lvh - 100svh + 10vh + 44px);
     }
 
     .white_card {
