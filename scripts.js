@@ -156,7 +156,32 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
     var tabs = gallery.querySelectorAll('.gallery_tab');
     var captions = gallery.querySelectorAll('.gallery_caption');
     var next = gallery.querySelector('.gallery_next');
+    var strip = gallery.querySelector('.gallery_tabs');
+    var more = gallery.querySelector('.gallery_tabs_more'); // ">" next to tabs that don't fit (mobile)
     var current = 0;
+
+    // the pill turns into a scrolling strip + ">" only when the tabs don't fit
+    function fitTabs() {
+        if (!more) return;
+        var wrap = more.parentNode;
+        wrap.classList.remove('is-overflow');
+        wrap.classList.toggle('is-overflow', strip.scrollWidth > strip.clientWidth + 1);
+        fadeTabs();
+    }
+
+    // fade the strip at the edges it can still scroll to
+    function fadeTabs() {
+        var max = strip.scrollWidth - strip.clientWidth;
+        strip.classList.toggle('fade_start', strip.scrollLeft > 1);
+        strip.classList.toggle('fade_end', strip.scrollLeft < max - 1);
+    }
+
+    // keep the active tab in the middle of the strip (only moves the strip, not the page)
+    function centerTab(tab) {
+        if (strip.scrollWidth <= strip.clientWidth) return;
+        var left = tab.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft;
+        strip.scrollTo({ left: left - (strip.clientWidth - tab.offsetWidth) / 2, behavior: 'smooth' });
+    }
 
     function currentVideo() {
         return items[current].querySelector('video');
@@ -171,6 +196,7 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         tabs.forEach(function (el, i) { el.classList.toggle('active', i === index); });
         captions.forEach(function (el, i) { el.classList.toggle('active', i === index); });
         loadMediaIn(items[index]); // a tab clicked before the block got near
+        if (tabs[index]) centerTab(tabs[index]);
 
         var video = currentVideo();
         if (video) {
@@ -183,12 +209,21 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         tab.addEventListener('click', function () { show(i); });
     });
 
-    // next slide, skipping slides whose tab is hidden (e.g. on mobile)
-    next.addEventListener('click', function () {
+    // next slide, skipping slides whose tab is hidden
+    function goNext() {
         var i = current;
         do { i = (i + 1) % items.length; } while (i !== current && tabs[i] && tabs[i].offsetParent === null);
         show(i);
-    });
+    }
+
+    next.addEventListener('click', goNext);
+    if (more) {
+        more.addEventListener('click', goNext);
+        strip.addEventListener('scroll', fadeTabs, { passive: true });
+        window.addEventListener('resize', fitTabs);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTabs);
+        fitTabs();
+    }
 
     // Autoplay the first video just before the gallery edge enters the screen:
     // iOS shows a not-yet-played video as a black box. From then on it just loops

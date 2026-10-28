@@ -231,6 +231,15 @@ body {
     overflow-x: auto;
 }
 
+/* tabs with a ">" button: only on mobile when the tabs don't fit (see the mobile block) */
+.gallery_tabs_wrap {
+    display: contents;
+}
+
+.gallery_tabs_more {
+    display: none;
+}
+
 .gallery_tab {
     flex: none;
     padding: 12px 18px;
@@ -2203,9 +2212,50 @@ html.is-loading .hero {
         display: none;
     }
 
-    /* concept gallery: no "Інфраструктура" slide on mobile */
-    #benefits-gallery .gallery_tab[data-index="3"] {
-        display: none;
+    /* tabs that don't fit (concept gallery): the pill holds a scrolling strip + a ">" button,
+       the strip fades out at the edges it can still scroll to (JS sets the classes) */
+    .gallery_tabs_wrap.is-overflow {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        margin: 20px auto 0;
+        padding: 4px;
+        border-radius: 999px;
+        background: #f2f2f4;
+    }
+
+    .gallery_tabs_wrap.is-overflow .gallery_tabs {
+        --fade-start: 0px;
+        --fade-end: 0px;
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border-radius: 999px;
+        background: none;
+        -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+        mask-image: linear-gradient(to right, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+    }
+
+    .gallery_tabs_wrap.is-overflow .gallery_tabs.fade_start {
+        --fade-start: 44px;
+    }
+
+    .gallery_tabs_wrap.is-overflow .gallery_tabs.fade_end {
+        --fade-end: 56px;
+    }
+
+    .gallery_tabs_wrap.is-overflow .gallery_tabs_more {
+        display: block;
+        flex: none;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: 0;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5l7 7-7 7'/%3E%3C/svg%3E") center / 20px no-repeat;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .gallery_tab {
