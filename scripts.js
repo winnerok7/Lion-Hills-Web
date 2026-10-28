@@ -198,6 +198,11 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         loadMediaIn(items[index]); // a tab clicked before the block got near
         if (tabs[index]) centerTab(tabs[index]);
 
+        // no "next" on the last slide (the tabs still go anywhere)
+        var last = nextIndex() === null;
+        next.classList.toggle('is-hidden', last);
+        if (more) more.classList.toggle('is-hidden', last);
+
         var video = currentVideo();
         if (video) {
             video.currentTime = 0;
@@ -209,11 +214,17 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         tab.addEventListener('click', function () { show(i); });
     });
 
-    // next slide, skipping slides whose tab is hidden
+    // next slide after the current one, skipping slides whose tab is hidden; null on the last one
+    function nextIndex() {
+        for (var i = current + 1; i < items.length; i++) {
+            if (!tabs[i] || tabs[i].offsetParent !== null) return i;
+        }
+        return null;
+    }
+
     function goNext() {
-        var i = current;
-        do { i = (i + 1) % items.length; } while (i !== current && tabs[i] && tabs[i].offsetParent === null);
-        show(i);
+        var i = nextIndex();
+        if (i !== null) show(i);
     }
 
     next.addEventListener('click', goNext);

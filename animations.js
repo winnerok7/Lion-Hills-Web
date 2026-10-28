@@ -114,14 +114,29 @@
                 return ghost;
             }) : null;
 
+            // mobile: one tween drives both opacities from a single progress p (0 hidden -> 1 sharp),
+            // so the focus pull is one continuous motion: the blurred copy rises first and hands over to the sharp text
+            function focus(part, from, to, at, duration) {
+                var ghost = ghosts[parts.indexOf(part)];
+                var state = { p: from };
+                tl.fromTo(state, { p: from }, {
+                    p: to,
+                    duration: duration,
+                    ease: 'sine.inOut',
+                    immediateRender: false, // an "out" tween would otherwise show its part fully right away
+                    onUpdate: function () {
+                        var p = state.p;
+                        part.style.opacity = Math.pow(p, 1.6);
+                        ghost.style.opacity = Math.min(1, p * 3) * (1 - p);
+                    }
+                }, at);
+            }
+
             // each part comes out of blur; "out" parts blur away again (0.5s)
             var lastIn = 0;
             function partIn(part, at, duration) {
                 if (ghosts) {
-                    var ghost = ghosts[parts.indexOf(part)];
-                    tl.fromTo(ghost, { opacity: 0 }, { opacity: 1, duration: duration * 0.45, ease: 'sine.out' }, at)
-                      .to(ghost, { opacity: 0, duration: duration * 0.6, ease: 'sine.inOut' }, at + duration * 0.4)
-                      .fromTo(part, { opacity: 0 }, { opacity: 1, duration: duration * 0.7, ease: 'sine.inOut' }, at + duration * 0.3);
+                    focus(part, 0, 1, at, duration);
                 } else {
                     tl.fromTo(part,
                         { opacity: 0, filter: 'blur(' + blur + 'px)', color: '#bdbdbd' },
@@ -131,10 +146,7 @@
             }
             function partOut(part, at) {
                 if (ghosts) {
-                    var ghost = ghosts[parts.indexOf(part)];
-                    tl.to(part, { opacity: 0, duration: 0.4, ease: 'sine.in' }, at)
-                      .to(ghost, { opacity: 0.8, duration: 0.2, ease: 'sine.out' }, at)
-                      .to(ghost, { opacity: 0, duration: 0.35, ease: 'sine.in' }, at + 0.2);
+                    focus(part, 1, 0, at, 0.6);
                     return;
                 }
                 tl.to(part, { opacity: 0, filter: 'blur(' + blur + 'px)', duration: 0.5, ease: 'sine.in' }, at);

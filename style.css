@@ -219,6 +219,20 @@ body {
     background-color: rgba(210, 210, 215, 0.9);
 }
 
+/* last slide: no "next" */
+.gallery_next,
+.gallery_tabs_more {
+    transition: opacity 0.3s ease, background-color 0.2s ease, visibility 0s;
+}
+
+.gallery_next.is-hidden,
+.gallery_tabs_more.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, background-color 0.2s ease, visibility 0s linear 0.3s;
+}
+
 .gallery_tabs {
     display: flex;
     width: fit-content;
@@ -271,11 +285,13 @@ body {
     line-height: 1.4;
     color: #6e6e73;
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.2s ease;
 }
 
+/* captions share one cell: the old one is gone before the new one comes in, so they never overlap */
 .gallery_caption.active {
     opacity: 1;
+    transition: opacity 0.35s ease 0.2s;
 }
 
 .gallery_caption strong {
