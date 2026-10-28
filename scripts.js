@@ -10,6 +10,18 @@
 var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
 var isMobile = window.matchMedia('(max-width: 767px)').matches;
 
+// menu anchors: Lenis glide on desktop (under the top pill); native smooth scroll on mobile,
+// where the page has CSS scroll-snap on the villas and Lenis' frame-by-frame scrolling would snag on it
+function goTo(target) {
+    if (window.innerWidth <= 767) {
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 20, behavior: 'smooth' });
+    } else if (window.lenis) {
+        window.lenis.scrollTo(target, { offset: -110 });
+    } else {
+        target.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
 // [data-load] elements of one group, in page order
 function loadGroup(name) {
     return Array.prototype.filter.call(document.querySelectorAll('[data-load]'), function (el) {
@@ -132,7 +144,8 @@ var loaderDone = new Promise(function (resolve) {
         });
     }, { rootMargin: '100% 0px' });
     loaderDone.then(function () {
-        roots.forEach(function (root) { near.observe(root); });
+        // a carousel is watched by its track: .lots .carousel is display: contents on mobile, no box to observe
+        roots.forEach(function (root) { near.observe(root.querySelector('.carousel_track') || root); });
     });
 })();
 
@@ -179,12 +192,19 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
 
     // Autoplay the first video just before the gallery edge enters the screen:
     // iOS shows a not-yet-played video as a black box
+    // after that the current video only plays while the gallery is on screen
     var started = false;
     new IntersectionObserver(function (entries) {
-        if (entries[0].isIntersecting && !started) {
+        var on = entries[0].isIntersecting;
+        if (on && !started) {
             started = true;
             show(0);
+            return;
         }
+        var video = started && currentVideo();
+        if (!video) return;
+        if (on) video.play().catch(function () {});
+        else video.pause();
     }, { rootMargin: '0px 0px 15% 0px' }).observe(gallery);
 });
 
@@ -260,9 +280,14 @@ document.querySelectorAll('.stories').forEach(function (root) {
         seg.addEventListener('click', function () { show(i); });
     });
 
-    // The progress bar only runs while the block is on screen
+    // The progress bar and the slide's video only run while the block is on screen
     new IntersectionObserver(function (entries) {
-        root.classList.toggle('in_view', entries[0].isIntersecting);
+        var on = entries[0].isIntersecting;
+        root.classList.toggle('in_view', on);
+        var v = slides[current].querySelector('video');
+        if (!v) return;
+        if (on) v.play().catch(function () {});
+        else v.pause();
     }, { threshold: 0.5 }).observe(root);
 
     var nearObserver = new IntersectionObserver(function (entries) {
@@ -300,6 +325,27 @@ document.querySelectorAll('.stories').forEach(function (root) {
     obs.observe(first);
 })();
 
+// Autoplay videos (architecture, build1/2) only play while on screen. iOS stops offscreen videos and,
+// with many videos on the page, can drop their frames and not restart them (a blank box on the way back)
+(function () {
+    var watch = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+            var v = e.target;
+            v.onScreen = e.isIntersecting;
+            if (!e.isIntersecting) { v.pause(); return; }
+            if (!v.getAttribute('src')) return; // not loaded yet: the autoplay attribute starts it
+            // dropped by the browser (no data and not loading): fetch it again
+            if (v.error || (v.readyState === 0 && v.networkState !== v.NETWORK_LOADING)) v.load();
+            v.play().catch(function () {});
+        });
+    });
+    document.querySelectorAll('video[autoplay]').forEach(function (v) {
+        watch.observe(v);
+        // the autoplay attribute starts it as soon as its src is set, wherever it is
+        v.addEventListener('playing', function () { if (!v.onScreen) v.pause(); });
+    });
+})();
+
 // Pill header: shows up once the hero has scrolled out of view, expands into the menu
 (function () {
     var bar = document.querySelector('.sticky_header');
@@ -312,11 +358,13 @@ document.querySelectorAll('.stories').forEach(function (root) {
     var panelLinks = panel.querySelectorAll('a');
     var heroMenu = document.querySelector('.header_menu');
     var barRow = bar.querySelector('.sticky_header_bar'); // its height = closed pill (66px, 60px on mobile)
+    var footer = document.querySelector('.footer');
     var pastHero = false;
+    var atFooter = false; // mobile: the bottom pill (and its veil) steps aside for the real footer
     var open = false;
 
     function render() {
-        var show = pastHero || open;
+        var show = (pastHero && !(atFooter && window.innerWidth <= 767)) || open;
         bar.classList.toggle('is-visible', show);
         bar.classList.toggle('is-open', open);
         document.documentElement.classList.toggle('menu-open', open);
@@ -336,15 +384,14 @@ document.querySelectorAll('.stories').forEach(function (root) {
     toggle.addEventListener('click', function () { setOpen(!open); });
     // the hero button opens the glass drawer instead (see below)
 
-    // menu anchors: close, then glide to the section under the pill (on mobile the pill is at the bottom)
+    // menu anchors: close, then glide to the section
     panel.querySelectorAll('a[href^="#"]').forEach(function (a) {
         var target = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href'));
         if (!target) return;
         a.addEventListener('click', function (e) {
             e.preventDefault();
             setOpen(false);
-            if (window.lenis) window.lenis.scrollTo(target, { offset: window.innerWidth <= 767 ? -20 : -110 });
-            else target.scrollIntoView({ behavior: 'smooth' });
+            goTo(target);
         });
     });
 
@@ -361,6 +408,11 @@ document.querySelectorAll('.stories').forEach(function (root) {
         pastHero = !e.isIntersecting && e.boundingClientRect.bottom <= 0;
         render();
     }).observe(hero);
+
+    if (footer) new IntersectionObserver(function (entries) {
+        atFooter = entries[0].isIntersecting;
+        render();
+    }).observe(footer);
 })();
 
 // Floorplan download pill: stays on from the first villa banner through the last one
@@ -441,8 +493,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
         a.addEventListener('click', function (e) {
             e.preventDefault();
             setOpen(false);
-            if (window.lenis) window.lenis.scrollTo(target, { offset: window.innerWidth <= 767 ? -20 : -110 });
-            else target.scrollIntoView({ behavior: 'smooth' });
+            goTo(target);
         });
     });
 

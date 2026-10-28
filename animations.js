@@ -105,15 +105,38 @@
             }
             progress();
 
+            // mobile: animating filter: blur() on text is choppy in iOS Safari and snaps sharp at the very end,
+            // so each part gets a still blurred copy (.loader_ghost) and only opacities cross-fade
+            var ghosts = isMobile ? parts.map(function (part) {
+                var ghost = part.cloneNode(true);
+                ghost.classList.add('loader_ghost');
+                part.parentNode.insertBefore(ghost, part); // same grid cell, under the sharp text
+                return ghost;
+            }) : null;
+
             // each part comes out of blur; "out" parts blur away again (0.5s)
             var lastIn = 0;
             function partIn(part, at, duration) {
-                tl.fromTo(part,
-                    { opacity: 0, filter: 'blur(' + blur + 'px)', color: '#bdbdbd' },
-                    { opacity: 1, filter: 'blur(0px)', color: '#252525', duration: duration, ease: 'sine.out' }, at);
+                if (ghosts) {
+                    var ghost = ghosts[parts.indexOf(part)];
+                    tl.fromTo(ghost, { opacity: 0 }, { opacity: 1, duration: duration * 0.45, ease: 'sine.out' }, at)
+                      .to(ghost, { opacity: 0, duration: duration * 0.6, ease: 'sine.inOut' }, at + duration * 0.4)
+                      .fromTo(part, { opacity: 0 }, { opacity: 1, duration: duration * 0.7, ease: 'sine.inOut' }, at + duration * 0.3);
+                } else {
+                    tl.fromTo(part,
+                        { opacity: 0, filter: 'blur(' + blur + 'px)', color: '#bdbdbd' },
+                        { opacity: 1, filter: 'blur(0px)', color: '#252525', duration: duration, ease: 'sine.out' }, at);
+                }
                 lastIn = Math.max(lastIn, at + duration);
             }
             function partOut(part, at) {
+                if (ghosts) {
+                    var ghost = ghosts[parts.indexOf(part)];
+                    tl.to(part, { opacity: 0, duration: 0.4, ease: 'sine.in' }, at)
+                      .to(ghost, { opacity: 0.8, duration: 0.2, ease: 'sine.out' }, at)
+                      .to(ghost, { opacity: 0, duration: 0.35, ease: 'sine.in' }, at + 0.2);
+                    return;
+                }
                 tl.to(part, { opacity: 0, filter: 'blur(' + blur + 'px)', duration: 0.5, ease: 'sine.in' }, at);
             }
 
@@ -290,7 +313,7 @@
         gsap.fromTo(footer,
             { '--inset': isMobile ? '12px' : '2.5vw', y: isMobile ? -50 : -100 },
             {
-                '--inset': isMobile ? '0px' : '0.5vw',
+                '--inset': isMobile ? '6px' : '0.5vw',
                 y: 0,
                 ease: 'none',
                 scrollTrigger: {
