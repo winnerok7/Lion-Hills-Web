@@ -1,5 +1,5 @@
 // ---------- Media loading ----------
-// Everything below the hero has data-src instead of src (data-src-mobile, if set, wins on mobile). Order:
+// Everything below the hero has data-src instead of src (data-src-mobile, if set, wins on mobile; data-media drops an element on the other device). Order:
 // 1) critical, loaded while the loader runs (its line/% show the real progress):
 //    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero)
 // 2) queue: [data-load="queue"] one by one in page order (first slide of the other sliders, build2)
@@ -9,6 +9,12 @@
 
 var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
 var isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+// data-media="desktop" / "mobile": a slide whose media differs in kind between devices (photo vs video);
+// the other device's element is dropped before anything loads or plays
+document.querySelectorAll(isMobile ? '[data-media="desktop"]' : '[data-media="mobile"]').forEach(function (el) {
+    el.parentNode.removeChild(el);
+});
 
 // menu anchors: Lenis glide on desktop (under the top pill); native smooth scroll on mobile,
 // where the page has CSS scroll-snap on the villas and Lenis' frame-by-frame scrolling would snag on it
@@ -53,7 +59,11 @@ function whenLoaded(el, max) {
         var t = setTimeout(resolve, max || 10000);
         function done() { clearTimeout(t); resolve(); }
         el.addEventListener('error', done, { once: true });
-        if (el.tagName === 'VIDEO') {
+        if (el.tagName === 'VIDEO' && isMobile) {
+            // iOS doesn't buffer a video that isn't playing, so canplaythrough may never come: metadata is enough
+            if (el.readyState >= 1) return done();
+            el.addEventListener('loadedmetadata', done, { once: true });
+        } else if (el.tagName === 'VIDEO') {
             if (el.readyState >= 4) return done();
             el.addEventListener('canplaythrough', done, { once: true });
         } else {
@@ -147,7 +157,9 @@ var loaderDone = new Promise(function (resolve) {
             loadMediaIn(e.target);
         });
     }, { rootMargin: '100% 0px' });
-    loaderDone.then(function () {
+    // not before the critical set: on desktop the "Концепція" gallery is already within a screen at the top,
+    // and its other videos (~28MB) would take the bandwidth from the loader
+    Promise.all([window.criticalReady, loaderDone]).then(function () {
         // a carousel is watched by its track: .lots .carousel is display: contents on mobile, no box to observe
         roots.forEach(function (root) { near.observe(root.querySelector('.carousel_track') || root); });
     });
