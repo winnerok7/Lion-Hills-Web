@@ -1945,8 +1945,15 @@ a.drawer_card {
     color: rgba(255, 255, 255, 0.5);
 }
 
-.footer_bottom p:first-child {
-    grid-column: 1 / 3;
+/* back to top: bottom row, under the contacts column */
+.footer_top {
+    --btn-bg: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    align-self: end;
+    justify-self: start;
+    color: #161616;
 }
 
 
@@ -2818,6 +2825,13 @@ html.is-loading .hero {
 
     .footer_bottom p {
         align-self: flex-start;
+        font-size: 14px;
+    }
+
+    .footer_top {
+        order: -1;
+        align-self: flex-start;
+        margin-bottom: 20px;
         font-size: 14px;
     }
 }

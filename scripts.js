@@ -561,6 +561,17 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
     });
 });
 
+// Footer "back to top": a longer Lenis glide on desktop (it's the whole page), native smooth scroll on mobile
+document.querySelectorAll('.footer_top').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        if (window.innerWidth > 767 && window.lenis) {
+            window.lenis.scrollTo(0, { duration: 1.8 });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+});
+
 // Header veil: match the color of whatever is under the pill's edge (white card vs dark sections);
 // top edge on desktop, bottom edge on mobile where the pill floats at the bottom
 (function () {
