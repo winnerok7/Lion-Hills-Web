@@ -941,14 +941,15 @@ body {
     margin-top: 40px;
 }
 
+/* 2.5 cards per screen: bigger plans, the third one peeks in */
 .lots .carousel_card {
-    flex: 0 0 calc((100% - 40px) / 3);
+    flex: 0 0 calc((100% - 40px) / 2.5);
 }
 
 .lot_card {
     display: flex;
     flex-direction: column;
-    padding: 24px 28px 32px;
+    padding: 24px 20px 32px;
     border-radius: 4px;
     background: #f7f7f7;
 }

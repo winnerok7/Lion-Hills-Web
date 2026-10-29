@@ -37,6 +37,8 @@ function loadMedia(el) {
     if (isMobile && el.hasAttribute('data-src-mobile')) src = el.getAttribute('data-src-mobile');
     el.removeAttribute('data-src');
     el.src = src;
+    // decode right away (off the main thread), not on the first paint mid-scroll / mid-animation
+    if (el.tagName === 'IMG' && el.decode) el.decode().catch(function () {});
 }
 
 function loadMediaIn(root) {

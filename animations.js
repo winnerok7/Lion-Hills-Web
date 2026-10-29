@@ -320,6 +320,31 @@
             });
     }
 
+    // hero depth on scroll: the photo lags behind the page, the title lags less and fades out (scrubbed both ways).
+    // Uses y (px), not the intro's yPercent/scale on the photo, so the two never fight. Desktop only, like firstCardScale
+    function heroParallax() {
+        var hero = document.querySelector('.hero');
+        var media = document.querySelector('.hero_media');
+        var content = document.querySelector('.hero_content');
+        if (!hero || isMobile) return;
+        if (media) {
+            gsap.to(media, {
+                y: function () { return hero.offsetHeight * 0.3; },
+                ease: 'none',
+                scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true, invalidateOnRefresh: true }
+            });
+        }
+        if (content) {
+            gsap.set(content, { x: 0, xPercent: -50 }); // keep the CSS centering (translateX(-50%)) as GSAP's own transform
+            gsap.to(content, {
+                y: function () { return hero.offsetHeight * 0.15; },
+                opacity: 0,
+                ease: 'none',
+                scrollTrigger: { trigger: hero, start: 'top top', end: '60% top', scrub: true, invalidateOnRefresh: true }
+            });
+        }
+    }
+
     // footer widens to the edges and slides down, uncovering the big outro text (scrubbed both ways)
     function footerReveal() {
         var footer = document.querySelector('.footer');
@@ -465,6 +490,7 @@
         all('[data-anim="count"]').forEach(countUp);
 
         firstCardScale();
+        heroParallax();
         footerReveal();
         setupSnap();
         ScrollTrigger.refresh();
