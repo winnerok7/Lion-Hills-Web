@@ -34,7 +34,7 @@
     var lenis = null;
     if (window.Lenis) {
         lenis = new Lenis({
-            duration: 1.15,
+            duration: 0.85,
             easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
             smoothWheel: true,
             syncTouch: false

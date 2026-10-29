@@ -70,10 +70,13 @@
                     <li style="--i: 2"><a href="#infrastructure" tabindex="-1">Інфраструктура</a></li>
                 </ul>
                 <div class="menu_bottom" style="--i: 4">
-                    <a class="menu_btn btn-soft" href="#" tabindex="-1">Завантажити брошуру</a>
                     <div class="menu_contacts">
                         <a href="tel:+380657865567" tabindex="-1">+380657865567</a>
                         <a href="mailto:lionhillsvillas@gmail.com" tabindex="-1">lionhillsvillas@gmail.com</a>
+                    </div>
+                    <div class="menu_btns">
+                        <a class="menu_btn btn-soft" href="#" tabindex="-1">Завантажити брошуру</a>
+                        <a class="menu_btn menu_btn_map btn-soft" href="https://www.google.com/maps/search/?api=1&amp;query=Lion+Hills+%D0%9B%D1%96%D1%81%D0%BD%D0%B8%D0%BA%D0%B8" target="_blank" rel="noopener" tabindex="-1">Локація в Google Maps</a>
                     </div>
                 </div>
             </nav>
@@ -103,7 +106,27 @@
                 <a class="drawer_link" href="#penthouses" style="--i: 6" tabindex="-1">Пентхауси</a>
                 <a class="drawer_link" href="#build" style="--i: 7" tabindex="-1">Будівництво</a>
             </nav>
-            <a class="drawer_btn btn-soft" href="#" style="--i: 8" tabindex="-1">Завантажити брошуру</a>
+            <div class="drawer_cards" style="--i: 8">
+                <a class="drawer_card" href="#" tabindex="-1">
+                    <span class="drawer_card_label">Брошура</span>
+                    <span class="drawer_card_value">Завантажити</span>
+                    <svg class="drawer_card_arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M6 1v8M2.5 5.5L6 9l3.5-3.5M1.5 11h9" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                </a>
+                <a class="drawer_card drawer_map" href="https://www.google.com/maps/search/?api=1&amp;query=Lion+Hills+%D0%9B%D1%96%D1%81%D0%BD%D0%B8%D0%BA%D0%B8" target="_blank" rel="noopener" tabindex="-1">
+                    <span class="drawer_card_label">Локація</span>
+                    <span class="drawer_card_value">Google Maps</span>
+                    <svg class="drawer_card_arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M2 10L10 2M4 2h6v6" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                </a>
+                <div class="drawer_card drawer_contacts">
+                    <span class="drawer_card_label">Контакти</span>
+                    <a class="drawer_card_value" href="tel:+380632263062" tabindex="-1">+380 (63) 226 30 62</a>
+                    <a class="drawer_mail" href="mailto:lionhillsvillas@gmail.com" tabindex="-1">lionhillsvillas@gmail.com</a>
+                </div>
+            </div>
         </aside>
 
         <a class="plan_download" href="#" aria-hidden="true" tabindex="-1">
@@ -282,13 +305,13 @@
             </div>
 
             <div class="ready">
-                <div class="ready_box" data-anim="fade">
+                <div class="ready_box" data-anim="fade-only">
                     <video data-load="critical" data-load-mobile="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build1.mp4" data-src-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build Ready.mp4" autoplay muted loop playsinline></video>
                     <div class="ready_head">
-                        <h2 class="ready_title" data-anim="lines">Готові окремі вілли та пентхауси</h2>
-                        <p class="ready_label" data-anim="fade">Повна готовність – 2027 рік, можна починати ремонт</p>
+                        <h2 class="ready_title">Готові окремі вілли та пентхауси</h2>
+                        <p class="ready_label">Повна готовність – 2027 рік, можна починати ремонт</p>
                     </div>
-                    <a class="ready_btn btn-soft" data-anim="fade-only" href="#">Запис на перегляд</a>
+                    <a class="ready_btn btn-soft" href="#">Запис на перегляд</a>
                 </div>
             </div>
 
@@ -493,7 +516,7 @@
 
 
 
-        <div class="white_card white_card_next">
+        <div class="white_card white_card_next white_card_last">
             <div class="villas" id="penthouses">
                 <p class="villas_label" data-anim="fade">Колекція пентхаусів</p>
                 <h2 class="villas_title" data-anim="lines">Пентхауси з басейном і<br>видами на Лісники</h2>
@@ -573,13 +596,13 @@
             </div>
 
             <div class="ready">
-                <div class="ready_box" data-anim="fade">
+                <div class="ready_box" data-anim="fade-only">
                     <video data-load="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build2.mp4" data-src-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build 27.mp4" autoplay muted loop playsinline></video>
                     <div class="ready_head">
-                        <p class="ready_label" data-anim="fade">Готовність комплексу</p>
-                        <h2 class="ready_title" data-anim="lines">2027 рік</h2>
+                        <p class="ready_label">Готовність комплексу</p>
+                        <h2 class="ready_title">2027 рік</h2>
                     </div>
-                    <a class="ready_btn btn-soft" data-anim="fade-only" href="#">Запис на перегляд</a>
+                    <a class="ready_btn btn-soft" href="#">Запис на перегляд</a>
                 </div>
             </div>
 

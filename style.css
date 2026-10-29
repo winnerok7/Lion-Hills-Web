@@ -401,6 +401,13 @@ body {
     margin-top: 0;
 }
 
+/* the last card (with the footer) runs to the bottom edge: square bottom, no dark strip under it */
+.white_card.white_card_last {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 .villas {
     max-width: 1600px;
     margin: 0 auto;
@@ -473,8 +480,8 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 55%;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
+    height: 45%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0));
     z-index: 1;
     pointer-events: none;
 }
@@ -689,9 +696,15 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 35%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+    height: 55%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
     pointer-events: none;
+}
+
+/* main photo of each villa (title + area): a lighter fade */
+.stories_slide:has(.stories_caption)::after {
+    height: 45%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
 }
 
 .stories_img {
@@ -846,7 +859,7 @@ body {
     margin: 0 auto;
     width: min(720px, calc(100% - 120px));
     text-align: center;
-    font-size: 14px;
+    font-size: 18px;
     line-height: 1.35;
     z-index: 1;
 }
@@ -1238,27 +1251,43 @@ body {
     opacity: 0.6;
 }
 
+/* contacts on the left under the links, then a row of buttons: brochure + a quieter grey map link */
 .menu_bottom {
-    display: grid;
-    grid-template-columns: 226px 1fr;
-    align-items: end;
-    margin-top: 33px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    margin-top: 40px;
 }
 
+.menu_btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* the two buttons split the row evenly; on very narrow phones they wrap */
 .menu_btn {
     --btn-bg: #e6e6e6;
-    justify-self: start;
-    padding: 13px 18px;
+    flex: 1 1 0;
+    text-align: center;
+    padding: 16px 18px;
     border-radius: calc(20px * var(--btn-k));
     color: #161616;
     font-size: 12px;
     letter-spacing: 0;
 }
 
+.menu_btn_map {
+    --btn-bg: #3a3a3a;
+    color: rgba(255, 255, 255, 0.85);
+}
+
 .menu_contacts {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 11px;
+    padding-left: 11px;
 }
 
 .menu_contacts a {
@@ -1463,17 +1492,128 @@ body {
     opacity: 0.6;
 }
 
-.drawer_btn {
-    --btn-bg: #fff;
-    align-self: flex-start;
-    margin-top: 48px;
+/* white cards at the bottom: location + brochure (half width each), contacts below */
+.drawer_cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: 40px;
+}
+
+.drawer_card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 14px 16px 16px;
+    border-radius: 18px;
+    background: #fff;
     color: #161616;
+    text-decoration: none;
+}
+
+.drawer_card_label {
+    font-size: 13px;
+    line-height: 1;
+    color: #8a8a8a;
+}
+
+.drawer_card_value {
+    font-size: 17px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+a.drawer_card {
+    transition: scale 0.4s cubic-bezier(0.44, 0, 0.56, 1);
+}
+
+.drawer_card_arrow {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    color: #8a8a8a;
+    transition: translate 0.4s cubic-bezier(0.44, 0, 0.56, 1), color 0.3s ease;
+}
+
+@media (hover: hover) {
+    a.drawer_card:hover {
+        scale: 0.97;
+    }
+
+    a.drawer_card:hover .drawer_card_arrow {
+        color: #161616;
+    }
+
+    .drawer_map:hover .drawer_card_arrow {
+        translate: 2px -2px;
+    }
+}
+
+/* contacts: full width; the email drops out if the card is too narrow for it */
+.drawer_contacts {
+    grid-column: 1 / -1;
+    container-type: inline-size;
+    background: rgba(22, 22, 22, 0.55);
+    color: #fff;
+}
+
+.drawer_contacts .drawer_card_label {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.drawer_contacts .drawer_card_value {
+    transition: opacity 0.3s ease;
+}
+
+.drawer_contacts .drawer_card_value:hover {
+    opacity: 0.7;
+}
+
+.drawer_mail {
+    font-size: 14px;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+}
+
+.drawer_mail:hover {
+    color: #fff;
+}
+
+@container (max-width: 200px) {
+    .drawer_mail {
+        display: none;
+    }
+}
+
+/* short laptop screens: tighter so the cards still fit */
+@media (min-width: 768px) and (max-height: 780px) {
+    .drawer_nav {
+        gap: 8px;
+        margin-top: 32px;
+    }
+
+    .drawer_link {
+        font-size: 23px;
+    }
+
+    .drawer_cards {
+        margin-top: 28px;
+    }
 }
 
 /* contents fade up one by one as the drawer drops; on close they go at once */
 .drawer_top,
 .drawer_link,
-.drawer_btn {
+.drawer_cards {
     opacity: 0;
     transform: translateY(14px);
     transition: opacity 0.2s ease, transform 0.2s ease, scale var(--btn-ease, 0.3s), border-radius var(--btn-ease, 0.3s);
@@ -1481,7 +1621,7 @@ body {
 
 .drawer.is-open .drawer_top,
 .drawer.is-open .drawer_link,
-.drawer.is-open .drawer_btn {
+.drawer.is-open .drawer_cards {
     opacity: 1;
     transform: none;
     transition: opacity 0.5s ease, transform 0.8s var(--drawer-ease), scale var(--btn-ease, 0.3s), border-radius var(--btn-ease, 0.3s);
@@ -1673,7 +1813,7 @@ body {
     font-size: var(--outro-size);
     line-height: 0.85;
     letter-spacing: -0.04em;
-    background: linear-gradient(180deg, #4e4e4e 0%, #6a6a6a 50%, #ececec 100%);
+    background: linear-gradient(180deg, #2e2e2e 0%, #3e3e3e 75%, #a6a6a6 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -1691,7 +1831,7 @@ body {
     grid-template-rows: 1fr auto;
     gap: 120px 40px;
     min-height: 600px;
-    margin: calc(clamp(48px, 9vw, 140px) * -0.1) var(--inset) 5px; /* bottom of the 2nd outro line stays tucked under */
+    margin: calc(clamp(48px, 9vw, 140px) * 0.06) var(--inset) 5px; /* small gap under the 2nd outro line, descenders stay readable */
     padding: 64px 52px 52px;
     border-radius: 16px;
     background: #374A46;
@@ -2048,7 +2188,7 @@ html.is-loading .hero {
         font-size: 24px;
     }
 
-    .drawer_btn {
+    .drawer_cards {
         margin-top: 36px;
     }
 
@@ -2058,14 +2198,16 @@ html.is-loading .hero {
     }
 
     .menu_bottom {
-        grid-template-columns: 1fr;
-        gap: 22px;
+        gap: 26px;
+        margin-top: 33px;
+    }
+
+    .menu_contacts {
         padding-left: 6px;
     }
 
     .menu_btn {
-        order: 1;
-        margin-left: -6px;
+        padding: 16px 10px;
     }
 
     /* above the bottom pill; hidden for now */
