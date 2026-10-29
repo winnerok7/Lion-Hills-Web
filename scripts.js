@@ -1,5 +1,5 @@
 // ---------- Media loading ----------
-// Everything below the hero has data-src instead of src. Order:
+// Everything below the hero has data-src instead of src (data-src-mobile, if set, wins on mobile). Order:
 // 1) critical, loaded while the loader runs (its line/% show the real progress):
 //    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero)
 // 2) queue: [data-load="queue"] one by one in page order (first slide of the other sliders, build2)
@@ -30,9 +30,11 @@ function loadGroup(name) {
     });
 }
 
+// data-src-mobile: a separate (vertical / lighter) file for phones
 function loadMedia(el) {
     var src = el && el.getAttribute('data-src');
     if (!src) return;
+    if (isMobile && el.hasAttribute('data-src-mobile')) src = el.getAttribute('data-src-mobile');
     el.removeAttribute('data-src');
     el.src = src;
 }
