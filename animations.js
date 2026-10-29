@@ -321,12 +321,13 @@
     }
 
     // hero depth on scroll: the photo lags behind the page, the title lags less and fades out (scrubbed both ways).
-    // Uses y (px), not the intro's yPercent/scale on the photo, so the two never fight. Desktop only, like firstCardScale
+    // Uses y (px), not the intro's yPercent/scale on the photo, so the two never fight. Mobile too: the photo
+    // isn't inside a clipped card, so the iOS video issue from firstCardScale doesn't apply here
     function heroParallax() {
         var hero = document.querySelector('.hero');
         var media = document.querySelector('.hero_media');
         var content = document.querySelector('.hero_content');
-        if (!hero || isMobile) return;
+        if (!hero) return;
         if (media) {
             gsap.to(media, {
                 y: function () { return hero.offsetHeight * 0.3; },

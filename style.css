@@ -2422,6 +2422,13 @@ html.is-loading .hero {
         cursor: pointer;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+        transition: width 0.3s ease, opacity 0.3s ease, visibility 0s;
+    }
+
+    /* hidden ">" folds away, so the strip takes its place instead of leaving a gap */
+    .gallery_tabs_wrap.is-overflow .gallery_tabs_more.is-hidden {
+        width: 0;
+        transition: width 0.3s ease, opacity 0.3s ease, visibility 0s linear 0.3s;
     }
 
     .gallery_tab {
@@ -2588,7 +2595,7 @@ html.is-loading .hero {
        description at the bottom, kept clear of the floating bottom bar */
     .stories_text {
         top: 72px;
-        bottom: 104px;
+        bottom: calc(104px - 5%); /* % of the banner height */
         display: flex;
         flex-direction: column;
         justify-content: flex-end;

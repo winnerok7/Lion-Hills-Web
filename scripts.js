@@ -175,6 +175,7 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
     var strip = gallery.querySelector('.gallery_tabs');
     var more = gallery.querySelector('.gallery_tabs_more'); // ">" next to tabs that don't fit (mobile)
     var current = 0;
+    var isLast = false;
 
     // the pill turns into a scrolling strip + ">" only when the tabs don't fit
     function fitTabs() {
@@ -190,6 +191,14 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         var max = strip.scrollWidth - strip.clientWidth;
         strip.classList.toggle('fade_start', strip.scrollLeft > 1);
         strip.classList.toggle('fade_end', strip.scrollLeft < max - 1);
+        updateMore();
+    }
+
+    // ">" goes away (and gives its room to the strip) on the last slide or once the strip is scrolled to its end
+    function updateMore() {
+        if (!more) return;
+        var atEnd = strip.scrollLeft >= strip.scrollWidth - strip.clientWidth - 1;
+        more.classList.toggle('is-hidden', isLast || atEnd);
     }
 
     // keep the active tab in the middle of the strip (only moves the strip, not the page)
@@ -215,9 +224,9 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         if (tabs[index]) centerTab(tabs[index]);
 
         // no "next" on the last slide (the tabs still go anywhere)
-        var last = nextIndex() === null;
-        next.classList.toggle('is-hidden', last);
-        if (more) more.classList.toggle('is-hidden', last);
+        isLast = nextIndex() === null;
+        next.classList.toggle('is-hidden', isLast);
+        updateMore();
 
         var video = currentVideo();
         if (video) {
