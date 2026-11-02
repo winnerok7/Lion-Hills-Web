@@ -427,16 +427,16 @@
 
     // hero depth on scroll: the photo lags behind the page, the title lags less and fades out (scrubbed both ways).
     // Uses y (px), not the intro's yPercent/scale on the photo, so the two never fight.
-    // Mobile: the title only fades. Moving layers from JS against native touch scroll lands a frame late on iOS,
-    // so the photo and title shook while the white card came up
-    // (the white card itself no longer scales on the way in either: re-rendering that big card with its video
+    // Mobile: the photo parallax stays (the main effect), the title only fades: moving text from JS against
+    // native touch scroll lands a frame late on iOS and shook
+    // (the white card no longer scales on the way in: re-rendering that big card with its video
     // every frame cost more than the 2% was worth)
     function heroParallax() {
         var hero = document.querySelector('.hero');
         var media = document.querySelector('.hero_media');
         var content = document.querySelector('.hero_content');
         if (!hero) return;
-        if (media && !isMobile) {
+        if (media) {
             gsap.to(media, {
                 y: function () { return hero.offsetHeight * 0.3; },
                 ease: 'none',
