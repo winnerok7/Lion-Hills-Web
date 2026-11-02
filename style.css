@@ -1113,16 +1113,27 @@ body {
     border-radius: 27px;
 }
 
+/* the veil's colour, animatable (registered), so it can live in a gradient */
+@property --veil {
+    syntax: '<color>';
+    inherits: false;
+    initial-value: #fff;
+}
+
 /* soft veil behind the pill; takes the color of the section under it (JS adds .is-dark),
-   so it never shows up as a band */
+   so it never shows up as a band.
+   Painted as a gradient image, not background-color: Safari 26 fills the area behind its bars with the
+   background-color of fixed elements at the screen edge, so a coloured veil turned its see-through bottom bar
+   into a solid white / dark strip */
 .sticky_fade {
+    --veil: #fff;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 49;
     height: 100px;
-    background: #fff;
+    background-image: linear-gradient(var(--veil), var(--veil));
     /* eased stops (ease-in-out curve) so there's no visible edge where it ends */
     -webkit-mask-image: linear-gradient(180deg,
         rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.44) 8%, rgba(0, 0, 0, 0.42) 16%, rgba(0, 0, 0, 0.38) 24%,
@@ -1136,11 +1147,11 @@ body {
         rgba(0, 0, 0, 0.003) 94%, transparent 100%);
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.5s ease, background-color 0.4s ease;
+    transition: opacity 0.5s ease, --veil 0.4s ease;
 }
 
 .sticky_fade.is-dark {
-    background: #262626;
+    --veil: #262626;
 }
 
 .sticky_header.is-visible + .sticky_fade {
