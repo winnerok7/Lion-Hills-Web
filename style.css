@@ -2204,7 +2204,9 @@ html.is-loading .hero {
         height: 12px;
     }
 
-    /* pill floats at the bottom, 10% smaller; the menu opens upwards above the bar */
+    /* pill floats at the bottom, 10% smaller; the menu opens upwards above the bar.
+       Hidden, it only sinks 10px: at 24px it crossed the screen edge, and Safari 26 then filled its see-through
+       bottom bar with the pill's dark colour (a grey strip whenever the pill stepped aside for the footer) */
     .sticky_header {
         top: auto;
         bottom: calc(16px + env(safe-area-inset-bottom));
@@ -2214,7 +2216,7 @@ html.is-loading .hero {
         max-width: 396px;
         height: 60px;
         border-radius: 30px;
-        transform: translate(-50%, 24px);
+        transform: translate(-50%, 10px);
     }
 
     .sticky_header.is-open {
