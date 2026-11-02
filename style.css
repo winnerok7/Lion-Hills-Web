@@ -1722,10 +1722,7 @@ a.drawer_card {
     width: 470px;
     padding: 24px 24px 26px 28px;
     border-radius: 28px;
-    /* frosted glass, so the solid white button stands out on it */
-    background: rgba(255, 255, 255, 0.7);
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
-    backdrop-filter: blur(24px) saturate(140%);
+    background: #fff;
     color: #111;
     text-align: left;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -1768,7 +1765,7 @@ a.drawer_card {
 }
 
 .cookie_btn {
-    --btn-bg: #fff;
+    --btn-bg: #ebeae6;
     flex-shrink: 0;
     margin-left: auto;
     padding: 18px 24px;
@@ -2399,6 +2396,10 @@ html.is-loading .hero {
         width: auto;
         padding: 8px 8px 8px 16px;
         border-radius: 16px;
+        /* frosted glass over the photo, so the solid white button stands out on it (desktop stays white + grey) */
+        background: rgba(255, 255, 255, 0.7);
+        -webkit-backdrop-filter: blur(24px) saturate(140%);
+        backdrop-filter: blur(24px) saturate(140%);
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
         transform: translateY(10px);
     }
@@ -2424,6 +2425,7 @@ html.is-loading .hero {
     }
 
     .cookie_btn {
+        --btn-bg: #fff;
         padding: 12px 16px;
         border-radius: calc(12px * var(--btn-k));
         font-size: 14px;
@@ -2903,7 +2905,65 @@ html.is-loading .hero {
     }
 
     .stories_plan {
-        padding: 56px 16px 80px;
+        padding: 72px 16px 64px;
+    }
+
+    /* floor plans: one floor at a time (cross-fade), the floor pills under it */
+    .plan_floors {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .plan_floors_imgs {
+        display: grid;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+    }
+
+    .stories_plan .plan_floor {
+        grid-area: 1 / 1;
+        min-height: 0;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+    }
+
+    .stories_plan .plan_floor.active {
+        opacity: 1;
+    }
+
+    .plan_floors_tabs {
+        display: flex;
+        gap: 8px;
+        margin-top: 28px;
+    }
+
+    .plan_floors_tab {
+        padding: 11px 18px;
+        border: 0;
+        border-radius: 999px;
+        background: #e0e0e0;
+        color: #333;
+        font: inherit;
+        font-size: 13px;
+        line-height: 1;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .plan_floors_tab.active {
+        background: #3d3d3d;
+        color: #fff;
+    }
+
+    /* the side tap zones (prev / next) stop above the floor pills, so a tap on a pill doesn't flip the slide */
+    .stories:has(.stories_slide.active .plan_floors) .stories_prev,
+    .stories:has(.stories_slide.active .plan_floors) .stories_next {
+        bottom: 120px;
     }
 
     /* ---------- lots: button goes under the cards, arrows under the button ---------- */

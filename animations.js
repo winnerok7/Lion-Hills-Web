@@ -40,9 +40,14 @@
 
     // ---------- smooth scroll ----------
     // desktop only: on phones the scroll is native anyway (Lenis doesn't smooth touch), so it would only add
-    // a layer between the finger and ScrollTrigger; html.is-loading keeps the page still during the loader
+    // a layer between the finger and ScrollTrigger; html.is-loading keeps the page still during the loader.
+    // Not on Apple devices either (any Mac / MacBook, Intel or M chip, and iPads in desktop mode all say
+    // "Macintosh"; platform "MacIntel" as a backup): the trackpad already scrolls smoothly with its own momentum,
+    // Lenis on top of it felt laggy. No Lenis also means no villa snap there
+    var isApple = /Macintosh|Mac OS X|iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                  /^(Mac|iPhone|iPad|iPod)/.test(navigator.platform || '');
     var lenis = null;
-    if (window.Lenis && !isMobile) {
+    if (window.Lenis && !isMobile && !isApple) {
         lenis = new Lenis({
             duration: 0.85,
             easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },

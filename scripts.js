@@ -18,14 +18,14 @@ document.querySelectorAll(isMobile ? '[data-media="desktop"]' : '[data-media="mo
 });
 
 // menu anchors: Lenis glide on desktop (under the top pill); native smooth scroll on mobile,
-// where the page has CSS scroll-snap on the villas and Lenis' frame-by-frame scrolling would snag on it
+// where the page has CSS scroll-snap on the villas and Lenis' frame-by-frame scrolling would snag on it,
+// and on Macs, which have no Lenis (animations.js)
 function goTo(target) {
-    if (window.innerWidth <= 767) {
-        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 20, behavior: 'smooth' });
-    } else if (window.lenis) {
+    var mobile = window.innerWidth <= 767;
+    if (!mobile && window.lenis) {
         window.lenis.scrollTo(target, { offset: -110 });
     } else {
-        target.scrollIntoView({ behavior: 'smooth' });
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - (mobile ? 20 : 110), behavior: 'smooth' });
     }
 }
 
@@ -369,6 +369,21 @@ document.querySelectorAll('.stories').forEach(function (root) {
     nearObserver.observe(root);
 
     show(0);
+});
+
+// Villa floor plans (mobile): the pills switch between the first and the second floor
+document.querySelectorAll('.plan_floors').forEach(function (box) {
+    var tabs = box.querySelectorAll('.plan_floors_tab');
+    var floors = box.querySelectorAll('.plan_floor');
+    tabs.forEach(function (tab, i) {
+        tab.addEventListener('click', function () {
+            tabs.forEach(function (el, j) {
+                el.classList.toggle('active', j === i);
+                el.setAttribute('aria-pressed', j === i ? 'true' : 'false');
+            });
+            floors.forEach(function (el, j) { el.classList.toggle('active', j === i); });
+        });
+    });
 });
 
 // Once the first villa banner is near, all villa slides load in the background,
