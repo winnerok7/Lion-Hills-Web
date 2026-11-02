@@ -1,6 +1,10 @@
 (function () {
     var root = document.documentElement;
-    var loader = document.getElementById('loader');
+    var isMobile = window.matchMedia('(max-width: 767px)').matches;
+    // loader v1 (#loader) on mobile, v2 (#loader-v2) on desktop; the other one is dropped right away
+    var loader = document.getElementById(isMobile ? 'loader' : 'loader-v2');
+    var unused = document.getElementById(isMobile ? 'loader-v2' : 'loader');
+    if (unused) unused.remove();
 
     // scripts.js holds the rest of the media on mobile until the loader text is over
     function loaderDone() {
@@ -21,7 +25,6 @@
     // ---------- config ----------
     var EASE_OUT = 'expo.out';
     var STAGGER = { items: 0.1 };
-    var isMobile = window.matchMedia('(max-width: 767px)').matches;
     var K_DUR = isMobile ? 0.8 : 1;   // durations
     var K_Y = isMobile ? 0.6 : 1;     // y offsets
     var START = 'top 88%';
@@ -29,6 +32,7 @@
     function dur(v) { return v * K_DUR; }
     function y(v) { return v * K_Y; }
     function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+    function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
     // ---------- smooth scroll ----------
     var lenis = null;
@@ -49,9 +53,164 @@
 
     // ---------- effects ----------
 
-    // ---------- intro: loader -> hero curtain -> hero content (plays once; the loader lasts as long as the critical media takes, min ~4.6s) ----------
-    // loader phrase comes out of blur part by part while a line runs along the screen edge with a % counter,
-    // then the hero opens from the bottom over the grey screen and its texts come in
+    // ---------- loader v1 (mobile): logo, then the phrase come out of blur part by part ----------
+    // while a line runs along the screen edge with a % counter; the grey screen fades before the hero curtain
+    function loaderV1(tl, counter) {
+        var parts = all('.loader_part', loader);
+        var percent = loader.querySelector('.loader_percent');
+        var segs = all('.loader_frame i', loader);
+        var blur = isMobile ? 4 : 8;
+
+        // edge line from the bottom centre, clockwise: the drawn length is spread over the 5 segments
+        // (bottom-left half, left, top, right, bottom-right half) as scale transforms
+        function progress() {
+            var w = window.innerWidth, h = window.innerHeight;
+            var lens = [w / 2, h, w, h, w / 2];
+            var len = 2 * (w + h) * counter.v / 100;
+            segs.forEach(function (seg, i) {
+                var fill = Math.max(0, Math.min(1, len / lens[i]));
+                len -= lens[i];
+                seg.style.transform = (i % 2 ? 'scaleY(' : 'scaleX(') + fill + ')';
+            });
+            percent.textContent = Math.round(counter.v) + '%';
+        }
+        progress();
+
+        // mobile: animating filter: blur() on text is choppy in iOS Safari and snaps sharp at the very end,
+        // so each part gets a still blurred copy (.loader_ghost) and only opacities cross-fade
+        var ghosts = isMobile ? parts.map(function (part) {
+            var ghost = part.cloneNode(true);
+            ghost.classList.add('loader_ghost');
+            part.parentNode.insertBefore(ghost, part); // same grid cell, under the sharp text
+            return ghost;
+        }) : null;
+
+        // mobile: one tween drives both opacities from a single progress p (0 hidden -> 1 sharp),
+        // so the focus pull is one continuous motion: the blurred copy rises first and hands over to the sharp text
+        function focus(part, from, to, at, duration) {
+            var ghost = ghosts[parts.indexOf(part)];
+            var state = { p: from };
+            tl.fromTo(state, { p: from }, {
+                p: to,
+                duration: duration,
+                ease: 'sine.inOut',
+                immediateRender: false, // an "out" tween would otherwise show its part fully right away
+                onUpdate: function () {
+                    var p = state.p;
+                    part.style.opacity = Math.pow(p, 1.6);
+                    ghost.style.opacity = Math.min(1, p * 3) * (1 - p);
+                }
+            }, at);
+        }
+
+        // each part comes out of blur; "out" parts blur away again (0.5s)
+        var lastIn = 0;
+        function partIn(part, at, duration) {
+            if (ghosts) {
+                focus(part, 0, 1, at, duration);
+            } else {
+                tl.fromTo(part,
+                    { opacity: 0, filter: 'blur(' + blur + 'px)', color: '#bdbdbd' },
+                    { opacity: 1, filter: 'blur(0px)', color: '#252525', duration: duration, ease: 'sine.out' }, at);
+            }
+            lastIn = Math.max(lastIn, at + duration);
+        }
+        function partOut(part, at) {
+            if (ghosts) {
+                focus(part, 1, 0, at, 0.6);
+                return;
+            }
+            tl.to(part, { opacity: 0, filter: 'blur(' + blur + 'px)', duration: 0.5, ease: 'sine.in' }, at);
+        }
+
+        // every part opens the same slow way as the logo: 1.1s in, 0.3s hold before an "out"
+        var IN = 1.1;
+        partIn(parts[0], 0.5, IN); // short pause first so the start isn't abrupt
+        partOut(parts[0], 0.5 + IN + 0.3);
+        if (isMobile) {
+            // mobile: the phrase parts take turns in the centre too, the last one stays
+            partIn(parts[1], 2.4, IN);
+            partOut(parts[1], 2.4 + IN + 0.3);
+            partIn(parts[2], 4.3, IN);
+        } else {
+            // desktop: then the phrase builds up part by part in one line and stays
+            partIn(parts[1], 2.4, IN);
+            partIn(parts[2], 3.0, IN);
+        }
+        tl.addLabel('reveal', lastIn) // last part is fully in; the timeline waits here for the loading
+          .to(loader.children, { opacity: 0, duration: 0.5, ease: 'power1.out' }, 'reveal+=0.3');
+
+        return {
+            render: progress,
+            minLap: lastIn + 0.2,
+            done: function () { return wait(300); } // short hold on 100%
+        };
+    }
+
+    // ---------- loader v2 (desktop): the ornament (media/pattern.svg) shows through on the brand green ----------
+    // the horizontals first, then every other line on its own at a random moment: a soft gradient edge runs along it
+    // from its first point (the lower end in the markup) to the other; the whole drawing follows the loading,
+    // then the hero curtain rises over it while the ornament drifts up a little
+    function loaderV2(tl, counter) {
+        var svg = loader.querySelector('.loader_pattern');
+        var logo = loader.querySelector('.loader_v2_logo');
+        var defs = svg.querySelector('defs');
+        var NS = 'http://www.w3.org/2000/svg';
+        var BAND = 0.6;   // soft edge, as a share of the line length
+        var DUR = 0.3;    // one line's reveal, as a share of the whole loader
+        var H_PHASE = 0.25; // horizontals come first, within this share; the rest go after them in random order
+
+        var lines = all('line', svg).map(function (line, i) {
+            var x1 = +line.getAttribute('x1'), y1 = +line.getAttribute('y1');
+            var x2 = +line.getAttribute('x2'), y2 = +line.getAttribute('y2');
+            // opaque before the edge, transparent after it (pad spreads both ends along the line)
+            var grad = document.createElementNS(NS, 'linearGradient');
+            grad.id = 'loader-line-' + i;
+            grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+            grad.innerHTML = '<stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>';
+            defs.appendChild(grad);
+            line.style.stroke = 'url(#' + grad.id + ')';
+            var flat = Math.abs(y2 - y1) < 1;
+            var dur = flat ? H_PHASE * 0.8 : DUR;
+            var start = flat ? Math.random() * (H_PHASE - dur) : H_PHASE + Math.random() * (1 - H_PHASE - DUR);
+            return { grad: grad, x: x1, y: y1, dx: x2 - x1, dy: y2 - y1, start: start, dur: dur };
+        });
+
+        function render() {
+            var p = counter.v / 100;
+            lines.forEach(function (l) {
+                var t = Math.max(0, Math.min(1, (p - l.start) / l.dur));
+                t = t * t * (3 - 2 * t); // soft start and stop
+                // edge start: before the line's first point (all transparent) -> past its far end (all opaque)
+                var s = -BAND + t * (1 + BAND);
+                l.grad.setAttribute('x1', l.x + l.dx * s);
+                l.grad.setAttribute('y1', l.y + l.dy * s);
+                l.grad.setAttribute('x2', l.x + l.dx * (s + BAND));
+                l.grad.setAttribute('y2', l.y + l.dy * (s + BAND));
+            });
+        }
+
+        // short gap before the label so the timeline isn't empty at 0 (it would complete right away)
+        tl.addLabel('reveal', 0.05)
+          .to(svg, { yPercent: -8, duration: 1.6, ease: 'power2.inOut' }, 'reveal')
+          .to(logo, { y: function () { return -0.08 * window.innerHeight; }, duration: 1.6, ease: 'power2.inOut' }, 'reveal');
+
+        // once the ornament is drawn: the logo comes out of blur in the centre, a short hold, then the curtain
+        function done() {
+            return new Promise(function (resolve) {
+                gsap.timeline({ onComplete: resolve })
+                    .fromTo(logo, { opacity: 0, filter: 'blur(8px)' },
+                        { opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'sine.out' })
+                    .to({}, { duration: 0.5 });
+            });
+        }
+
+        return { render: render, minLap: 0, done: done };
+    }
+
+    // ---------- intro: loader -> hero curtain -> hero content (plays once; the loader lasts as long as the critical media takes, min 4s) ----------
+    // the loader (v1 or v2, see above) follows the real loading, then the hero opens from the bottom over it
+    // and its texts come in
     function intro() {
         var hero = document.querySelector('.hero');
         var media = document.querySelector('.hero_media');
@@ -84,95 +243,15 @@
             if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
             toTop();
 
-            var parts = all('.loader_part', loader);
-            var percent = loader.querySelector('.loader_percent');
-            var segs = all('.loader_frame i', loader);
+            // each version draws itself from counter.v (0..100) and puts the 'reveal' label on tl
             var counter = { v: 0 };
-            var blur = isMobile ? 4 : 8;
-
-            // edge line from the bottom centre, clockwise: the drawn length is spread over the 5 segments
-            // (bottom-left half, left, top, right, bottom-right half) as scale transforms
-            function progress() {
-                var w = window.innerWidth, h = window.innerHeight;
-                var lens = [w / 2, h, w, h, w / 2];
-                var len = 2 * (w + h) * counter.v / 100;
-                segs.forEach(function (seg, i) {
-                    var fill = Math.max(0, Math.min(1, len / lens[i]));
-                    len -= lens[i];
-                    seg.style.transform = (i % 2 ? 'scaleY(' : 'scaleX(') + fill + ')';
-                });
-                percent.textContent = Math.round(counter.v) + '%';
-            }
-            progress();
-
-            // mobile: animating filter: blur() on text is choppy in iOS Safari and snaps sharp at the very end,
-            // so each part gets a still blurred copy (.loader_ghost) and only opacities cross-fade
-            var ghosts = isMobile ? parts.map(function (part) {
-                var ghost = part.cloneNode(true);
-                ghost.classList.add('loader_ghost');
-                part.parentNode.insertBefore(ghost, part); // same grid cell, under the sharp text
-                return ghost;
-            }) : null;
-
-            // mobile: one tween drives both opacities from a single progress p (0 hidden -> 1 sharp),
-            // so the focus pull is one continuous motion: the blurred copy rises first and hands over to the sharp text
-            function focus(part, from, to, at, duration) {
-                var ghost = ghosts[parts.indexOf(part)];
-                var state = { p: from };
-                tl.fromTo(state, { p: from }, {
-                    p: to,
-                    duration: duration,
-                    ease: 'sine.inOut',
-                    immediateRender: false, // an "out" tween would otherwise show its part fully right away
-                    onUpdate: function () {
-                        var p = state.p;
-                        part.style.opacity = Math.pow(p, 1.6);
-                        ghost.style.opacity = Math.min(1, p * 3) * (1 - p);
-                    }
-                }, at);
-            }
-
-            // each part comes out of blur; "out" parts blur away again (0.5s)
-            var lastIn = 0;
-            function partIn(part, at, duration) {
-                if (ghosts) {
-                    focus(part, 0, 1, at, duration);
-                } else {
-                    tl.fromTo(part,
-                        { opacity: 0, filter: 'blur(' + blur + 'px)', color: '#bdbdbd' },
-                        { opacity: 1, filter: 'blur(0px)', color: '#252525', duration: duration, ease: 'sine.out' }, at);
-                }
-                lastIn = Math.max(lastIn, at + duration);
-            }
-            function partOut(part, at) {
-                if (ghosts) {
-                    focus(part, 1, 0, at, 0.6);
-                    return;
-                }
-                tl.to(part, { opacity: 0, filter: 'blur(' + blur + 'px)', duration: 0.5, ease: 'sine.in' }, at);
-            }
-
-            // every part opens the same slow way as the logo: 1.1s in, 0.3s hold before an "out"
-            var IN = 1.1;
-            partIn(parts[0], 0.5, IN); // short pause first so the start isn't abrupt
-            partOut(parts[0], 0.5 + IN + 0.3);
-            if (isMobile) {
-                // mobile: the phrase parts take turns in the centre too, the last one stays
-                partIn(parts[1], 2.4, IN);
-                partOut(parts[1], 2.4 + IN + 0.3);
-                partIn(parts[2], 4.3, IN);
-            } else {
-                // desktop: then the phrase builds up part by part in one line and stays
-                partIn(parts[1], 2.4, IN);
-                partIn(parts[2], 3.0, IN);
-            }
-            tl.addLabel('reveal', lastIn) // last part is fully in; the timeline waits here for the loading
-              .to(loader.children, { opacity: 0, duration: 0.5, ease: 'power1.out' }, 'reveal+=0.3');
+            var view = (loader.id === 'loader-v2' ? loaderV2 : loaderV1)(tl, counter);
+            view.render();
 
             // line + % follow the real loading (scripts.js loadProgress), eased so they glide instead of jumping;
             // never faster than one lap in MIN_LAP s, so with everything cached it still reads as a sweep
-            var MIN_LOADER = 4; // s, the line never closes sooner, even when everything is cached
-            var MIN_LAP = Math.max(MIN_LOADER, lastIn + 0.2); // and not before the last part settles
+            var MIN_LOADER = 4; // s, the loader never closes sooner, even when everything is cached
+            var MIN_LAP = Math.max(MIN_LOADER, view.minLap); // and not before v1's last text part settles
             var t0 = performance.now();
             var resolveLoaded;
             var loaded = new Promise(function (r) { resolveLoaded = r; });
@@ -186,7 +265,7 @@
                 // frame-rate independent smoothing (same feel at 60 and 120 Hz)
                 counter.v += (target - counter.v) * (1 - Math.pow(0.9, gsap.ticker.deltaRatio()));
                 if (target >= 100 && counter.v > 99.6) counter.v = 100;
-                progress();
+                view.render();
                 if (counter.v === 100) { gsap.ticker.remove(tick); resolveLoaded(); }
             };
             gsap.ticker.add(tick);
@@ -194,9 +273,10 @@
             tl.addLabel('reveal', 0);
         }
 
-        // the curtain needs the critical media (scripts.js criticalReady); with the loader also the line at 100%
+        // the curtain needs the critical media (scripts.js criticalReady); with the loader also the drawing at 100%
+        // and the version's own finish (v1: short hold, v2: logo)
         var ready = loader
-            ? loaded.then(function () { return new Promise(function (r) { setTimeout(r, 300); }); }) // short hold on 100%
+            ? loaded.then(view.done)
             : (window.criticalReady || Promise.resolve());
 
         function addHero() {

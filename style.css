@@ -2079,6 +2079,46 @@ html:not(.js-anim) .loader {
     font-variant-numeric: tabular-nums;
 }
 
+/* loader v2 (desktop; v1 is mobile only): the ornament on the brand green; every line gets its own
+   gradient stroke from animations.js, until then they stay hidden */
+.loader_v1 {
+    display: none;
+}
+
+.loader_v2 {
+    background: #374A46;
+}
+
+.loader_pattern {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4; /* the white ornament stays half see-through on the green, also when fully drawn */
+    will-change: transform;
+}
+
+.loader_pattern line {
+    stroke: none;
+}
+
+/* logo in the centre, full white over the dimmed ornament; animations.js brings it in */
+.loader_v2_logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    margin: -22px 0 0 -150px; /* centred without transform, GSAP owns that */
+    color: #fff;
+    opacity: 0;
+}
+
+.loader_v2_logo svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
 /* hero sits above the loader and opens like a curtain from the bottom */
 html.is-loading .hero {
     z-index: 101;
@@ -2235,6 +2275,15 @@ html.is-loading .hero {
         bottom: 0;
         height: 80px;
         transform: scaleY(-1);
+    }
+
+    /* mobile keeps loader v1 */
+    .loader_v1 {
+        display: grid;
+    }
+
+    .loader_v2 {
+        display: none;
     }
 
     .loader_text {
