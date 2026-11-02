@@ -1118,10 +1118,9 @@ body {
 }
 
 /* the veil's colour, animatable (registered), so it can live in a gradient */
-/* inherits: the mobile veil paints it from a ::before */
 @property --veil {
     syntax: '<color>';
-    inherits: true;
+    inherits: false;
     initial-value: #fff;
 }
 
@@ -2475,46 +2474,10 @@ html.is-loading .hero {
         font-size: 14px;
     }
 
-    /* veil at the bottom behind the pill, full width, fading upwards.
-       Safari 26 paints its see-through bottom bar with any fixed element at the edge that is 80%+ wide, and a
-       see-through one gets blended with the page colour (the white veil's 0.45 edge over #262626 = the grey strip).
-       So the fixed box itself is a 1px dot (too narrow to count) and the visible veil is its ::before,
-       which Safari doesn't sample */
+    /* no veil on mobile: Safari 26 either paints its see-through bottom bar with a full-width fixed layer at the
+       edge (grey strip) or, if it is kept out of that, clips it in a hard line where the bar begins */
     .sticky_fade {
-        top: auto;
-        right: auto;
-        bottom: 0;
-        left: 50%;
-        width: 1px;
-        height: 1px;
-        background-image: none;
-        -webkit-mask-image: none;
-        mask-image: none;
-    }
-
-    /* Safari 26 clips fixed elements where its bottom bar begins (and no longer extends the veil under it),
-       so a veil that is strongest at the bottom ended in a hard line there. This one starts from nothing at the
-       bottom edge, peaks behind the pill (~36px up) and fades out upwards as before: nothing left to cut */
-    .sticky_fade::before {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: -50vw;
-        width: 100vw;
-        height: 110px;
-        background-image: linear-gradient(var(--veil), var(--veil));
-        -webkit-mask-image: linear-gradient(0deg,
-            transparent 0, rgba(0, 0, 0, 0.12) 6px, rgba(0, 0, 0, 0.25) 12px, rgba(0, 0, 0, 0.36) 20px,
-            rgba(0, 0, 0, 0.42) 28px, rgba(0, 0, 0, 0.45) 36px, rgba(0, 0, 0, 0.44) 42px, rgba(0, 0, 0, 0.42) 48px,
-            rgba(0, 0, 0, 0.38) 54px, rgba(0, 0, 0, 0.33) 60px, rgba(0, 0, 0, 0.27) 66px, rgba(0, 0, 0, 0.21) 72px,
-            rgba(0, 0, 0, 0.15) 78px, rgba(0, 0, 0, 0.1) 84px, rgba(0, 0, 0, 0.06) 90px, rgba(0, 0, 0, 0.03) 96px,
-            rgba(0, 0, 0, 0.013) 101px, rgba(0, 0, 0, 0.003) 106px, transparent 110px);
-        mask-image: linear-gradient(0deg,
-            transparent 0, rgba(0, 0, 0, 0.12) 6px, rgba(0, 0, 0, 0.25) 12px, rgba(0, 0, 0, 0.36) 20px,
-            rgba(0, 0, 0, 0.42) 28px, rgba(0, 0, 0, 0.45) 36px, rgba(0, 0, 0, 0.44) 42px, rgba(0, 0, 0, 0.42) 48px,
-            rgba(0, 0, 0, 0.38) 54px, rgba(0, 0, 0, 0.33) 60px, rgba(0, 0, 0, 0.27) 66px, rgba(0, 0, 0, 0.21) 72px,
-            rgba(0, 0, 0, 0.15) 78px, rgba(0, 0, 0, 0.1) 84px, rgba(0, 0, 0, 0.06) 90px, rgba(0, 0, 0, 0.03) 96px,
-            rgba(0, 0, 0, 0.013) 101px, rgba(0, 0, 0, 0.003) 106px, transparent 110px);
+        display: none;
     }
 
     /* the loader runs down as far as the hero does: Safari 26's bottom bar floats over the page below 100lvh,
