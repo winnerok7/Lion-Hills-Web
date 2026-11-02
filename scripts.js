@@ -436,6 +436,7 @@ function presence(el, on, delay) {
         // the CSS fade-outs: pill 0.6s, veil 0.5s
         presence(bar, show, 700);
         presence(fade, show, 700);
+        document.documentElement.classList.toggle('pill-on', show); // the mobile cookie strip rides above the pill
         bar.classList.toggle('is-visible', show);
         bar.classList.toggle('is-open', open);
         document.documentElement.classList.toggle('menu-open', open);

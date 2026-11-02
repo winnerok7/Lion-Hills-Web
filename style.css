@@ -1722,7 +1722,10 @@ a.drawer_card {
     width: 470px;
     padding: 24px 24px 26px 28px;
     border-radius: 28px;
-    background: #fff;
+    /* frosted glass, so the solid white button stands out on it */
+    background: rgba(255, 255, 255, 0.7);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
     color: #111;
     text-align: left;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -1765,7 +1768,7 @@ a.drawer_card {
 }
 
 .cookie_btn {
-    --btn-bg: #ebeae6;
+    --btn-bg: #fff;
     flex-shrink: 0;
     margin-left: auto;
     padding: 18px 24px;
@@ -2384,23 +2387,25 @@ html.is-loading .hero {
         transform: translate(-50%, 12px);
     }
 
-    /* cookie notice: a slim full-width strip in the hero, under the "Запис на перегляд" button
-       (the button's bottom is at 85svh + 5vh - 24px from the hero's top), scrolling with the page.
-       Not fixed: Safari 26 would colour its bottom bar from a wide fixed element near the edge */
+    /* cookie notice: a slim full-width strip that stays at the bottom of the screen. 20px up, not at the edge:
+       Safari 26 colours its see-through bottom bar from wide fixed elements within ~3px of it.
+       While the pill is on screen (html.pill-on, scripts.js) it rides up above it; under the pill's open menu */
     .cookie {
-        position: absolute;
-        top: calc(90vh - 6px);
-        top: calc(85svh + 5vh - 6px);
         left: 12px;
         right: 12px;
-        bottom: auto;
-        z-index: 3;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        z-index: 48;
         gap: 12px;
         width: auto;
         padding: 8px 8px 8px 16px;
         border-radius: 16px;
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
         transform: translateY(10px);
+    }
+
+    /* pill: 16px from the bottom + 60px tall, the strip goes 10px above it */
+    .pill-on .cookie.is-visible {
+        transform: translateY(-66px);
     }
 
     .cookie_label {
@@ -2519,11 +2524,10 @@ html.is-loading .hero {
         font-size: 18px;
     }
 
-    /* same spot on screen as before: 5vh + 24px above the bottom of the small viewport */
-    /* 10% of the small viewport + 24px above its bottom */
+    /* 12% of the small viewport + 24px above its bottom (the hero runs 5vh + 20px past it) */
     .hero_btn {
-        bottom: calc(15vh + 44px);
-        bottom: calc(100lvh - 100svh + 15svh + 44px);
+        bottom: calc(17vh + 44px);
+        bottom: calc(100lvh - 100svh + 17svh + 44px);
         padding: 12px 16px;
         font-size: 14px;
     }
