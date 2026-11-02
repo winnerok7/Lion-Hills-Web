@@ -147,18 +147,29 @@
         };
     }
 
-    // ---------- loader v2 (desktop): the ornament (media/pattern.svg) shows through on the brand green ----------
+    // ---------- loader v2 (desktop): the ornament (media/pattern light upd 2.svg) shows through on the brand green ----------
     // the horizontals first, then every other line on its own at a random moment: a soft gradient edge runs along it
     // from its first point (the lower end in the markup) to the other; the whole drawing follows the loading,
-    // then the hero curtain rises over it while the ornament drifts up a little
+    // the logo and the phrase under it come in near the end; then the hero curtain rises over it all
+    // while the ornament drifts up a little
     function loaderV2(tl, counter) {
         var svg = loader.querySelector('.loader_pattern');
+        var brand = loader.querySelector('.loader_v2_brand');
         var logo = loader.querySelector('.loader_v2_logo');
+        var phrase = loader.querySelector('.loader_v2_phrase');
         var defs = svg.querySelector('defs');
         var NS = 'http://www.w3.org/2000/svg';
         var BAND = 0.6;   // soft edge, as a share of the line length
         var DUR = 0.3;    // one line's reveal, as a share of the whole loader
         var H_PHASE = 0.25; // horizontals come first, within this share; the rest go after them in random order
+        var BRAND_AT = 0.8; // the logo starts coming in at this share of the drawing, before the last lines settle
+
+        // logo out of blur, the phrase a moment later; started from render(), awaited by done()
+        var brandIn = gsap.timeline({ paused: true })
+            .fromTo(logo, { opacity: 0, filter: 'blur(8px)' },
+                { opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'sine.out' })
+            .fromTo(phrase, { opacity: 0, filter: 'blur(6px)' },
+                { opacity: 0.75, filter: 'blur(0px)', duration: 1, ease: 'sine.out' }, 0.45);
 
         var lines = all('line', svg).map(function (line, i) {
             var x1 = +line.getAttribute('x1'), y1 = +line.getAttribute('y1');
@@ -188,24 +199,24 @@
                 l.grad.setAttribute('x2', l.x + l.dx * (s + BAND));
                 l.grad.setAttribute('y2', l.y + l.dy * (s + BAND));
             });
+            if (p >= BRAND_AT && brandIn.paused()) brandIn.play();
         }
 
         // short gap before the label so the timeline isn't empty at 0 (it would complete right away)
         tl.addLabel('reveal', 0.05)
           .to(svg, { yPercent: -8, duration: 1.6, ease: 'power2.inOut' }, 'reveal')
-          .to(logo, { y: function () { return -0.08 * window.innerHeight; }, duration: 1.6, ease: 'power2.inOut' }, 'reveal');
+          .to(brand, { y: function () { return -0.08 * window.innerHeight; }, duration: 1.6, ease: 'power2.inOut' }, 'reveal');
 
-        // once the ornament is drawn: the logo comes out of blur in the centre, a short hold, then the curtain
+        // ornament drawn: let the logo + phrase finish coming in, a short hold, then the curtain
         function done() {
             return new Promise(function (resolve) {
-                gsap.timeline({ onComplete: resolve })
-                    .fromTo(logo, { opacity: 0, filter: 'blur(8px)' },
-                        { opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'sine.out' })
-                    .to({}, { duration: 0.5 });
+                brandIn.play(); // in case the drawing jumped past BRAND_AT
+                brandIn.eventCallback('onComplete', function () { setTimeout(resolve, 500); });
+                if (brandIn.progress() === 1) setTimeout(resolve, 500);
             });
         }
 
-        return { render: render, minLap: 0, done: done };
+        return { render: render, minLap: 5, done: done }; // 35 lines: a slower lap than v1's 4s minimum
     }
 
     // ---------- intro: loader -> hero curtain -> hero content (plays once; the loader lasts as long as the critical media takes, min 4s) ----------
@@ -251,7 +262,7 @@
             // line + % follow the real loading (scripts.js loadProgress), eased so they glide instead of jumping;
             // never faster than one lap in MIN_LAP s, so with everything cached it still reads as a sweep
             var MIN_LOADER = 4; // s, the loader never closes sooner, even when everything is cached
-            var MIN_LAP = Math.max(MIN_LOADER, view.minLap); // and not before v1's last text part settles
+            var MIN_LAP = Math.max(MIN_LOADER, view.minLap); // or longer if the version asks (v1: its text, v2: 5s)
             var t0 = performance.now();
             var resolveLoaded;
             var loaded = new Promise(function (r) { resolveLoaded = r; });
