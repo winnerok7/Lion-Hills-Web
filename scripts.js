@@ -662,14 +662,12 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
             box.hidden = false;
             void box.offsetWidth; // in the layout first, so the fade-up runs
             box.classList.add('is-visible');
-            document.documentElement.classList.add('cookie-on'); // mobile: the floorplan pill rides above it
         }, 2600);
     });
 
     box.querySelector('.cookie_btn').addEventListener('click', function () {
         try { localStorage.setItem(KEY, '1'); } catch (e) {}
         box.classList.remove('is-visible');
-        document.documentElement.classList.remove('cookie-on');
         setTimeout(function () { box.hidden = true; }, 700);
     });
 })();

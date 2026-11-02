@@ -254,6 +254,7 @@ body {
     border-radius: 999px;
     background: #f2f2f4;
     overflow-x: auto;
+    overflow-y: hidden;
 }
 
 /* tabs with a ">" button: only on mobile when the tabs don't fit (see the mobile block) */
@@ -344,12 +345,15 @@ body {
     line-height: 38px;
 }
 
+/* overflow-y stated: with only overflow-x: auto the browser makes the other axis auto too,
+   and the track could be dragged up and down by a few px */
 .carousel_track {
     display: flex;
     gap: 20px;
     margin-top: 40px;
     padding: 0 var(--gutter);
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-padding-left: var(--gutter);
     scrollbar-width: none;
@@ -1114,9 +1118,10 @@ body {
 }
 
 /* the veil's colour, animatable (registered), so it can live in a gradient */
+/* inherits: the mobile veil paints it from a ::before */
 @property --veil {
     syntax: '<color>';
-    inherits: false;
+    inherits: true;
     initial-value: #fff;
 }
 
@@ -2417,23 +2422,10 @@ html.is-loading .hero {
         padding: 16px 10px;
     }
 
-    /* above the bottom pill (16px + 60px, then 10px); while the cookie strip is up it rides over it too.
-       Narrow and well off the edge, so Safari 26 doesn't take its bar colour from it */
+    /* no floating floorplan pill on mobile: it covered the banner texts; the plan slide has its own
+       "Скачати планування" button under the floor pills instead */
     .plan_download {
-        top: auto;
-        bottom: calc(86px + env(safe-area-inset-bottom));
-        height: 38px;
-        padding: 0 16px;
-        transform: translate(-50%, 12px);
-        transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), translate 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.6s;
-    }
-
-    .plan_download.is-visible {
-        transition: opacity 0.4s ease 0.5s, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s, translate 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 0.5s;
-    }
-
-    .cookie-on .plan_download {
-        translate: 0 -62px;
+        display: none;
     }
 
     /* cookie notice: a slim full-width strip that stays at the bottom of the screen. 20px up, not at the edge:
@@ -2483,10 +2475,45 @@ html.is-loading .hero {
         font-size: 14px;
     }
 
-    /* no veil on mobile: a full-width fixed layer at the bottom edge is exactly what Safari 26 takes its bar colour
-       from (no see-through bar while it's there), and the pill covered nearly all of it anyway */
+    /* veil at the bottom behind the pill, full width, fading upwards.
+       Safari 26 paints its see-through bottom bar with any fixed element at the edge that is 80%+ wide, and a
+       see-through one gets blended with the page colour (the white veil's 0.45 edge over #262626 = the grey strip).
+       So the fixed box itself is a 1px dot (too narrow to count) and the visible veil is its ::before,
+       which Safari doesn't sample */
     .sticky_fade {
-        display: none;
+        top: auto;
+        right: auto;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        height: 1px;
+        background-image: none;
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+
+    /* the fixed box ends where Safari's bottom bar begins, and Safari no longer extends the veil under it,
+       so it runs 150px further down at full strength (seen through the glass bar), then the same 80px fade */
+    .sticky_fade::before {
+        content: "";
+        position: absolute;
+        bottom: -150px;
+        left: -50vw;
+        width: 100vw;
+        height: 230px;
+        background-image: linear-gradient(var(--veil), var(--veil));
+        -webkit-mask-image: linear-gradient(0deg,
+            rgba(0, 0, 0, 0.45) 150px, rgba(0, 0, 0, 0.44) 156.4px, rgba(0, 0, 0, 0.42) 162.8px,
+            rgba(0, 0, 0, 0.38) 169.2px, rgba(0, 0, 0, 0.33) 175.6px, rgba(0, 0, 0, 0.27) 182px,
+            rgba(0, 0, 0, 0.21) 188.4px, rgba(0, 0, 0, 0.15) 194.8px, rgba(0, 0, 0, 0.1) 201.2px,
+            rgba(0, 0, 0, 0.06) 207.6px, rgba(0, 0, 0, 0.03) 214px, rgba(0, 0, 0, 0.013) 220.4px,
+            rgba(0, 0, 0, 0.003) 225.2px, transparent 230px);
+        mask-image: linear-gradient(0deg,
+            rgba(0, 0, 0, 0.45) 150px, rgba(0, 0, 0, 0.44) 156.4px, rgba(0, 0, 0, 0.42) 162.8px,
+            rgba(0, 0, 0, 0.38) 169.2px, rgba(0, 0, 0, 0.33) 175.6px, rgba(0, 0, 0, 0.27) 182px,
+            rgba(0, 0, 0, 0.21) 188.4px, rgba(0, 0, 0, 0.15) 194.8px, rgba(0, 0, 0, 0.1) 201.2px,
+            rgba(0, 0, 0, 0.06) 207.6px, rgba(0, 0, 0, 0.03) 214px, rgba(0, 0, 0, 0.013) 220.4px,
+            rgba(0, 0, 0, 0.003) 225.2px, transparent 230px);
     }
 
     /* the loader runs down as far as the hero does: Safari 26's bottom bar floats over the page below 100lvh,
@@ -2974,7 +3001,7 @@ html.is-loading .hero {
     }
 
     .stories:has(.stories_slide.active .plan_floors) .stories_next::after {
-        top: calc(50% + 70px);
+        top: calc(50% + 102.5px);
         background: rgba(40, 40, 40, 0.75) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M13 6l6 6-6 6'/%3E%3C/svg%3E") center / 14px no-repeat;
     }
 
@@ -2999,30 +3026,62 @@ html.is-loading .hero {
         width: 100%;
     }
 
+    /* the old floor is gone (0.15s) before the new one comes in, so fast switching never shows both at once */
     .stories_plan .plan_floor {
         grid-area: 1 / 1;
         min-height: 0;
         opacity: 0;
-        transition: opacity 0.35s ease;
+        visibility: hidden;
+        transition: opacity 0.15s ease, visibility 0s linear 0.15s;
     }
 
     .stories_plan .plan_floor.active {
         opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease 0.15s, visibility 0s 0.15s;
+    }
+
+    /* floor pills, then a wide "Скачати планування" button as wide as the two pills together */
+    .plan_floors_actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 24px;
     }
 
     .plan_floors_tabs {
         display: flex;
         gap: 8px;
-        margin-top: 28px;
     }
 
-    /* slides are pointer-events: none (taps go to the prev / next zones); the pills of the shown one take taps */
-    .stories_slide.active .plan_floors_tabs {
+    .plan_floors_download {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px 18px;
+        border-radius: 999px;
+        background: #fff;
+        color: #161616;
+        font-size: 13px;
+        line-height: 1;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .plan_floors_download svg {
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+    }
+
+    /* slides are pointer-events: none (taps go to the prev / next zones); the buttons of the shown one take taps */
+    .stories_slide.active .plan_floors_actions {
         pointer-events: auto;
     }
 
     .plan_floors_tab {
-        padding: 11px 18px;
+        padding: 16px 18px;
         border: 0;
         border-radius: 999px;
         background: #e0e0e0;
@@ -3043,7 +3102,7 @@ html.is-loading .hero {
     /* the side tap zones (prev / next) stop above the floor pills, so a tap on a pill doesn't flip the slide */
     .stories:has(.stories_slide.active .plan_floors) .stories_prev,
     .stories:has(.stories_slide.active .plan_floors) .stories_next {
-        bottom: 140px;
+        bottom: 205px;
     }
 
     /* ---------- lots: button goes under the cards, arrows under the button ---------- */
