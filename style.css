@@ -2313,8 +2313,27 @@ html.is-loading .hero {
         transform: scaleY(-1);
     }
 
+    /* the loader runs down as far as the hero does: Safari 26's bottom bar floats over the page below 100lvh,
+       and the page under it showed through (dark strip + the white card) */
+    .loader {
+        height: calc(105vh + 20px);
+        height: calc(100lvh + 5vh + 20px);
+    }
+
+    /* ornament and logo centre on the visible height with the browser bars out (svh), not on 100lvh:
+       Chrome on iPhone showed the logo low; the ornament draws on past its box into the rest of the loader */
+    .loader_pattern {
+        bottom: auto;
+        height: 100vh;
+        height: 100svh;
+        overflow: visible;
+    }
+
     /* loader v2: logo fits the middle cell of the ornament (~265px wide at this scale) */
     .loader_v2_brand {
+        bottom: auto;
+        height: 100vh;
+        height: 100svh;
         gap: 14px;
     }
 

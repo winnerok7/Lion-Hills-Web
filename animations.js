@@ -170,9 +170,11 @@
         var H_PHASE = 0.25; // horizontals come first, within this share; the rest go after them in random order
         var BRAND_AT = 0.8; // the logo starts coming in at this share of the drawing, before the last lines settle
 
-        // mobile: at the phone's scale the 3 pattern rows cover only ~60% of the height, so one more row goes on
-        // each side (a copy of the bottom row above the top one, of the top row under the bottom one) and the
-        // view centres on the empty middle cell (x 509..1071) where the logo sits
+        // mobile: at the phone's scale the 3 pattern rows cover only ~60% of the height, so more rows go around
+        // them: a copy of the bottom row above the top one, of the top row under the bottom one (5 rows in view),
+        // and the middle row once more below that, drawn past the svg's box (overflow: visible) into the part of
+        // the loader that reaches under the browser's bottom bar. The view centres on the empty middle cell
+        // (x 509..1071) where the logo sits
         if (isMobile) {
             var ROW = 1086; // 3 rows of 362, edge to edge
             var flatYs = all('line', svg).filter(function (l) {
@@ -180,14 +182,17 @@
             }).map(function (l) { return +l.getAttribute('y1'); });
             all('line', svg).forEach(function (line) {
                 var y1 = +line.getAttribute('y1'), y2 = +line.getAttribute('y2');
-                var shift = Math.min(y1, y2) >= 723 ? -ROW : Math.max(y1, y2) <= 364 ? ROW : 0;
-                if (!shift) return;
-                // a copied edge that lands on an existing one would be drawn twice
-                if (y1 === y2 && flatYs.some(function (y) { return Math.abs(y - (y1 + shift)) < 1; })) return;
-                var copy = line.cloneNode();
-                copy.setAttribute('y1', y1 + shift);
-                copy.setAttribute('y2', y2 + shift);
-                svg.appendChild(copy);
+                // bottom row -> above; top and middle rows -> below; the bottom row's top edge also closes the extra row
+                var shifts = Math.min(y1, y2) >= 723 ? [-ROW] : [ROW];
+                if (y1 === y2 && Math.abs(y1 - 724.5) < 1) shifts.push(ROW);
+                shifts.forEach(function (shift) {
+                    // a copied edge that lands on an existing one would be drawn twice
+                    if (y1 === y2 && flatYs.some(function (y) { return Math.abs(y - (y1 + shift)) < 1; })) return;
+                    var copy = line.cloneNode();
+                    copy.setAttribute('y1', y1 + shift);
+                    copy.setAttribute('y2', y2 + shift);
+                    svg.appendChild(copy);
+                });
             });
             svg.setAttribute('viewBox', '-34 -362 1647 1810');
         }
