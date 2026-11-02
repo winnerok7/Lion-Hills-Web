@@ -923,7 +923,7 @@ body {
 }
 
 .stories_seg.active::after {
-    animation: stories-fill 7s linear forwards;
+    animation: stories-fill 15s linear forwards;
 }
 
 .stories:not(.in_view) .stories_seg.active::after {
@@ -1338,7 +1338,7 @@ body {
     height: 44px;
     margin-left: 18px;
     border-radius: 50%;
-    background: #374A46;
+    background: #008169;
     color: #fff;
     transition: scale 0.3s ease;
 }
