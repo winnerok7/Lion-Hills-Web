@@ -2204,15 +2204,17 @@ html.is-loading .hero {
         height: 12px;
     }
 
-    /* pill floats at the bottom, 10% smaller; the menu opens upwards above the bar.
-       Hidden, it only sinks 10px, so even mid fade-out it never crosses the screen edge (Safari 26 colours its
-       bottom bar from fixed elements there; once faded, scripts.js takes it out with display: none) */
+    /* pill floats at the bottom; the menu opens upwards above the bar.
+       Under 80% of the screen width: Safari 26 fills its see-through bottom bar with the colour of a fixed element
+       near the edge that is at least 80% wide, and the old ~83% pill turned it into a grey strip.
+       Hidden, it only sinks 10px, so even mid fade-out it never crosses the screen edge; once faded,
+       scripts.js takes it out with display: none */
     .sticky_header {
         top: auto;
         bottom: calc(16px + env(safe-area-inset-bottom));
         display: flex;
         flex-direction: column-reverse;
-        width: calc((100% - 32px) * 0.9);
+        width: 78%;
         max-width: 396px;
         height: 60px;
         border-radius: 30px;
@@ -2318,12 +2320,10 @@ html.is-loading .hero {
         transform: translate(-50%, 12px);
     }
 
-    /* veil sits at the bottom behind the pill (flipped, so the mask fades upwards) */
+    /* no veil on mobile: a full-width fixed layer at the bottom edge is exactly what Safari 26 takes its bar colour
+       from (no see-through bar while it's there), and the pill covered nearly all of it anyway */
     .sticky_fade {
-        top: auto;
-        bottom: 0;
-        height: 80px;
-        transform: scaleY(-1);
+        display: none;
     }
 
     /* the loader runs down as far as the hero does: Safari 26's bottom bar floats over the page below 100lvh,
