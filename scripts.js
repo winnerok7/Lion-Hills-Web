@@ -4,8 +4,9 @@
 //    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero)
 // 2) queue: [data-load="queue"] one by one in page order (first slide of the other sliders, build2)
 // 3) the rest: gallery/carousel slides once their block is about a screen away; stories load current + next slide
-// On mobile data-load-mobile overrides data-load: critical is only fonts + hero photo (iOS doesn't buffer
-// videos that aren't playing, so the loader would hang on them), and the rest waits for the loader to end
+// On mobile data-load-mobile overrides data-load: the critical videos go to the queue (iOS doesn't buffer
+// videos that aren't playing, so the loader would hang on them), critical is fonts + hero photo + the villa
+// covers (fast scrolling showed black banners while they loaded), and the rest waits for the loader to end
 
 var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
 var isMobile = window.matchMedia('(max-width: 767px)').matches;
