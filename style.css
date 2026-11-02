@@ -2050,6 +2050,11 @@ a.drawer_card {
 
 /* ---------- Animations ---------- */
 
+/* .nl-wrap isn't ours: something injected from outside the site's code; kept off the page */
+.nl-wrap {
+    display: none !important;
+}
+
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
@@ -2904,8 +2909,31 @@ html.is-loading .hero {
         right: 0;
     }
 
+    /* a visible "next" arrow in the right tap zone, mid-banner, like the galleries' one, so it's clear the
+       banner flips on a tap; dark on the light floor plan slide (the zone is 140px shorter there, see below) */
+    .stories_next::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        margin-top: -16px;
+        border-radius: 50%;
+        background: rgba(210, 210, 215, 0.64) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M13 6l6 6-6 6'/%3E%3C/svg%3E") center / 14px no-repeat;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        pointer-events: none;
+    }
+
+    .stories:has(.stories_slide.active .plan_floors) .stories_next::after {
+        top: calc(50% + 70px);
+        background: rgba(40, 40, 40, 0.75) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M13 6l6 6-6 6'/%3E%3C/svg%3E") center / 14px no-repeat;
+    }
+
+    /* bottom room keeps the floor pills clear of the bottom pill / cookie strip over the banner's lower edge */
     .stories_plan {
-        padding: 72px 16px 64px;
+        padding: 72px 16px 90px;
     }
 
     /* floor plans: one floor at a time (cross-fade), the floor pills under it */
@@ -2941,6 +2969,11 @@ html.is-loading .hero {
         margin-top: 28px;
     }
 
+    /* slides are pointer-events: none (taps go to the prev / next zones); the pills of the shown one take taps */
+    .stories_slide.active .plan_floors_tabs {
+        pointer-events: auto;
+    }
+
     .plan_floors_tab {
         padding: 11px 18px;
         border: 0;
@@ -2963,7 +2996,7 @@ html.is-loading .hero {
     /* the side tap zones (prev / next) stop above the floor pills, so a tap on a pill doesn't flip the slide */
     .stories:has(.stories_slide.active .plan_floors) .stories_prev,
     .stories:has(.stories_slide.active .plan_floors) .stories_next {
-        bottom: 120px;
+        bottom: 140px;
     }
 
     /* ---------- lots: button goes under the cards, arrows under the button ---------- */

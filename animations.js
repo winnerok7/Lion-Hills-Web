@@ -199,7 +199,9 @@
                     svg.appendChild(copy);
                 });
             });
-            svg.setAttribute('viewBox', '-34 -362 1647 1810');
+            // the 5 rows are -34 -362 1647 1810; 5% closer in around the same centre, so the top edge line
+            // sits ~20px above the screen instead of drawing a white line along the very top of the page
+            svg.setAttribute('viewBox', '5 -319 1569 1724');
         }
 
         // logo out of blur, the phrase a moment later; started from render(), awaited by done().
