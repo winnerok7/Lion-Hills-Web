@@ -435,6 +435,17 @@
                 scrollTrigger: { trigger: hero, start: 'top top', end: '60% top', scrub: true, invalidateOnRefresh: true }
             });
         }
+        // the button steps away as soon as the page moves down and comes back at the very top
+        // (a class, not a tween: the intro owns the button's opacity)
+        var btn = document.querySelector('.hero_btn');
+        if (btn) {
+            ScrollTrigger.create({
+                trigger: hero,
+                start: 'top+=40 top',
+                end: 'max',
+                onToggle: function (self) { btn.classList.toggle('is-away', self.isActive); }
+            });
+        }
     }
 
     // footer widens to the edges and slides down, uncovering the big outro text (scrubbed both ways)
