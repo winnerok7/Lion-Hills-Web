@@ -22,6 +22,9 @@
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return bail();
 
     gsap.registerPlugin(ScrollTrigger, SplitText);
+    // the iOS address bar folding in and out is a resize: without this every scroll back up to the top
+    // re-measured all triggers (and re-split the scrubbed text) mid-scroll, a visible hitch
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     // ---------- config ----------
     var EASE_OUT = 'expo.out';
@@ -270,6 +273,7 @@
                 if (media) gsap.set(media, { clearProps: 'transform' });
                 if (split) split.revert(); // real text back, so it reflows on resize
                 gsap.set([sub, btn], { clearProps: 'transform' }); // back to the CSS centering
+                document.removeEventListener('touchmove', holdTouch);
                 if (lenis) lenis.start();
                 ScrollTrigger.refresh();
             }
@@ -281,9 +285,14 @@
             if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
         }
 
+        // the loader isn't position: fixed (see .loader in style.css), so on a phone a swipe could drag the page
+        // under it; html.is-loading hides the overflow, this also stops iOS touch scrolling until the intro ends
+        function holdTouch(e) { e.preventDefault(); }
+
         if (loader) {
             if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
             toTop();
+            document.addEventListener('touchmove', holdTouch, { passive: false });
 
             // each version draws itself from counter.v (0..100) and puts the 'reveal' label on tl
             var counter = { v: 0 };
@@ -428,7 +437,8 @@
     // hero depth on scroll: the photo lags behind the page, the title lags less and fades out (scrubbed both ways).
     // Uses y (px), not the intro's yPercent/scale on the photo, so the two never fight.
     // Mobile: the photo parallax stays (the main effect), the title only fades: moving text from JS against
-    // native touch scroll lands a frame late on iOS and shook
+    // native touch scroll lands a frame late on iOS and shook. Where the browser has CSS scroll-driven
+    // animations (iOS 26+) the photo parallax is the CSS one in style.css instead, in step with the finger
     // (the white card no longer scales on the way in: re-rendering that big card with its video
     // every frame cost more than the 2% was worth)
     function heroParallax() {
@@ -436,7 +446,8 @@
         var media = document.querySelector('.hero_media');
         var content = document.querySelector('.hero_content');
         if (!hero) return;
-        if (media) {
+        var cssParallax = isMobile && window.CSS && CSS.supports('animation-timeline: scroll()');
+        if (media && !cssParallax) {
             gsap.to(media, {
                 y: function () { return hero.offsetHeight * 0.3; },
                 ease: 'none',

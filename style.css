@@ -2008,9 +2008,16 @@ html:not(.js-anim) .loader {
     display: none;
 }
 
+/* absolute over the first screen, not fixed: Safari 26 colours its bars from fixed elements at the screen
+   edges and repaints them ~1s late, so a fixed green loader stayed on the bars over the hero. The page is held
+   at the top while it's on (html.is-loading + animations.js), so it looks the same */
 .loader {
-    position: fixed;
-    inset: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100lvh;
     z-index: 100;
     display: grid;
     place-items: center;
@@ -2146,6 +2153,12 @@ html:not(.js-anim) .loader {
 html.is-loading .hero {
     z-index: 101;
     clip-path: inset(100% 0 0 0);
+}
+
+/* hero photo parallax as a CSS scroll-driven animation (mobile, see the mobile block): `translate`, so it adds
+   to the intro's GSAP transform instead of fighting it; 30% of the photo layer = 30% of the hero height */
+@keyframes hero-parallax {
+    to { translate: 0 30%; }
 }
 
 
@@ -2340,6 +2353,18 @@ html.is-loading .hero {
 
     .hero_media {
         background-image: url('media/vert hero mob new 2.jpg');
+    }
+
+    /* photo parallax over the hero's own height, run by the browser in step with the scroll
+       (animations.js skips its GSAP version where this is supported) */
+    @media (prefers-reduced-motion: no-preference) {
+        @supports (animation-timeline: scroll()) {
+            .hero_media {
+                animation: hero-parallax linear both;
+                animation-timeline: scroll(root block);
+                animation-range: 0 calc(100lvh + 5vh + 20px);
+            }
+        }
     }
 
     .hero_content {
