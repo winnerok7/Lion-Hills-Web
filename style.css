@@ -2092,7 +2092,7 @@ html:not(.js-anim) .loader {
     font-variant-numeric: tabular-nums;
 }
 
-/* loader v2 (desktop; v1 is mobile only): the ornament on the brand green; every line gets its own
+/* loader v2 (desktop + mobile; v1 is kept but off): the ornament on the brand green; every line gets its own
    gradient stroke from animations.js, until then they stay hidden */
 .loader_v1 {
     display: none;
@@ -2300,13 +2300,17 @@ html.is-loading .hero {
         transform: scaleY(-1);
     }
 
-    /* mobile keeps loader v1 */
-    .loader_v1 {
-        display: grid;
+    /* loader v2: logo fits the middle cell of the ornament (~265px wide at this scale) */
+    .loader_v2_brand {
+        gap: 14px;
     }
 
-    .loader_v2 {
-        display: none;
+    .loader_v2_logo {
+        width: 170px;
+    }
+
+    .loader_v2_phrase {
+        font-size: 15px;
     }
 
     .loader_text {

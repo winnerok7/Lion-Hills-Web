@@ -16,7 +16,7 @@
 </head>
 <body>
 
-    <!-- loader v1 (mobile): logo + phrase out of blur, line along the screen edge, % counter -->
+    <!-- loader v1 (off, kept to switch back: LOADER in animations.js): logo + phrase out of blur, line along the screen edge, % counter -->
     <div class="loader loader_v1" id="loader" aria-hidden="true">
         <div class="loader_frame" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
         <p class="loader_text">
@@ -33,7 +33,7 @@
         <p class="loader_percent">0%</p>
     </div>
 
-    <!-- loader v2 (desktop): the ornament (media/pattern light upd 2.svg) lines come out of transparency one by one, in random order -->
+    <!-- loader v2 (desktop + mobile): the ornament (media/pattern light upd 2.svg) lines come out of transparency one by one, in random order -->
     <div class="loader loader_v2" id="loader-v2" aria-hidden="true">
         <svg class="loader_pattern" viewBox="0 0 1647 1088" preserveAspectRatio="xMidYMid slice" fill="none" stroke="#fff">
             <!-- animations.js gives every line its own gradient stroke here -->
@@ -473,7 +473,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Desktop Villas/Villa4/Desktop/Compressed/villa 4 new cropped.png" data-src-mobile="media/Mobile Villas/Villa 4/villa4 Compressed.png" alt="">
+                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Desktop Villas/Villa4/Desktop/Compressed/villa 4 new cropped.png" data-src-mobile="media/Mobile Villas/Villa 4/villa4 Compressed.png" alt="" style="--pos-mobile: 20% center">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 450м<sup>2</sup></h3>
                             <p class="stories_sub">Архітектура вражень</p>
@@ -498,7 +498,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/villa 5 new.png" data-src-mobile="media/Mobile Villas/Villa 5/Villa5 Compressed.png" alt="">
+                        <img decoding="async" class="stories_img" data-load="critical" data-load-mobile="queue" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/villa 5 new.png" data-src-mobile="media/Mobile Villas/Villa 5/Villa5 Compressed.png" alt="" style="--pos-mobile: 28% center">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 550м<sup>2</sup></h3>
                             <p class="stories_sub">Флагманська вілла</p>

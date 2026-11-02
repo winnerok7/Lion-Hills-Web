@@ -463,6 +463,21 @@ document.querySelectorAll('.stories').forEach(function (root) {
     }).observe(footer);
 })();
 
+// Scroll handlers below compare scrollY with section positions measured here, only when the layout changes
+// (resize, load, page height change), so a scroll frame never forces a layout read in the middle of the animations
+function onLayout(measure) {
+    measure();
+    window.addEventListener('resize', measure);
+    window.addEventListener('load', measure);
+    if (window.ResizeObserver) new ResizeObserver(function () { measure(); }).observe(document.body);
+}
+
+// document-space top / bottom of an element
+function docBox(el) {
+    var r = el.getBoundingClientRect();
+    return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY };
+}
+
 // Floorplan download pill: stays on from the first villa banner through the last one
 (function () {
     var link = document.querySelector('.plan_download');
@@ -471,14 +486,21 @@ document.querySelectorAll('.stories').forEach(function (root) {
 
     var first = villas[0];
     var last = villas[villas.length - 1];
+    var firstTop = 0, lastBottom = 0;
     var ticking = false;
+
+    function measure() {
+        firstTop = docBox(first).top;
+        lastBottom = docBox(last).bottom;
+        update();
+    }
 
     function update() {
         ticking = false;
         var vh = window.innerHeight;
+        var y = window.scrollY;
         // first banner has (almost) filled the screen and the last one hasn't left it yet
-        var show = first.getBoundingClientRect().top <= vh * 0.15 &&
-                   last.getBoundingClientRect().bottom >= vh * 0.85;
+        var show = firstTop - y <= vh * 0.15 && lastBottom - y >= vh * 0.85;
         if (show === link.classList.contains('is-visible')) return;
         link.classList.toggle('is-visible', show);
         link.setAttribute('aria-hidden', show ? 'false' : 'true');
@@ -488,8 +510,7 @@ document.querySelectorAll('.stories').forEach(function (root) {
     window.addEventListener('scroll', function () {
         if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
-    window.addEventListener('resize', update);
-    update();
+    onLayout(measure);
 })();
 
 // Hero menu: glass drawer with Kyiv time and date
@@ -595,26 +616,26 @@ document.querySelectorAll('.footer_top').forEach(function (btn) {
 // top edge on desktop, bottom edge on mobile where the pill floats at the bottom
 (function () {
     var fade = document.querySelector('.sticky_fade');
-    if (!fade || !document.elementsFromPoint) return;
+    var darks = document.querySelectorAll('.clubhouse');
+    if (!fade) return;
 
-    var SKIP = '.sticky_header, .sticky_fade, .drawer, .plan_download';
+    var ranges = [];
     var ticking = false;
+
+    function measure() {
+        ranges = Array.prototype.map.call(darks, docBox);
+        update();
+    }
 
     function update() {
         ticking = false;
-        var y = window.innerWidth <= 767 ? window.innerHeight - 2 : 2;
-        var stack = document.elementsFromPoint(window.innerWidth / 2, y);
-        var el = null;
-        for (var i = 0; i < stack.length; i++) {
-            if (!stack[i].closest(SKIP)) { el = stack[i]; break; }
-        }
+        var y = window.scrollY + (window.innerWidth <= 767 ? window.innerHeight - 2 : 2);
         // dark only over the two dark screens (infrastructure, autonomy), white everywhere else
-        fade.classList.toggle('is-dark', !!(el && el.closest('.clubhouse')));
+        fade.classList.toggle('is-dark', ranges.some(function (r) { return y >= r.top && y < r.bottom; }));
     }
 
     window.addEventListener('scroll', function () {
         if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
-    window.addEventListener('resize', update);
-    update();
+    onLayout(measure);
 })();

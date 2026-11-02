@@ -1,9 +1,10 @@
 (function () {
     var root = document.documentElement;
     var isMobile = window.matchMedia('(max-width: 767px)').matches;
-    // loader v1 (#loader) on mobile, v2 (#loader-v2) on desktop; the other one is dropped right away
-    var loader = document.getElementById(isMobile ? 'loader' : 'loader-v2');
-    var unused = document.getElementById(isMobile ? 'loader-v2' : 'loader');
+    // loader v2 (#loader-v2) everywhere; v1 (#loader) stays in the markup and code to switch back, dropped right away
+    var LOADER = 'v2';
+    var loader = document.getElementById(LOADER === 'v2' ? 'loader-v2' : 'loader');
+    var unused = document.getElementById(LOADER === 'v2' ? 'loader' : 'loader-v2');
     if (unused) unused.remove();
 
     // scripts.js holds the rest of the media on mobile until the loader text is over
@@ -35,8 +36,10 @@
     function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
     // ---------- smooth scroll ----------
+    // desktop only: on phones the scroll is native anyway (Lenis doesn't smooth touch), so it would only add
+    // a layer between the finger and ScrollTrigger; html.is-loading keeps the page still during the loader
     var lenis = null;
-    if (window.Lenis) {
+    if (window.Lenis && !isMobile) {
         lenis = new Lenis({
             duration: 0.85,
             easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
@@ -147,7 +150,7 @@
         };
     }
 
-    // ---------- loader v2 (desktop): the ornament (media/pattern light upd 2.svg) shows through on the brand green ----------
+    // ---------- loader v2: the ornament (media/pattern light upd 2.svg) shows through on the brand green ----------
     // the horizontals first, then every other line on its own at a random moment: a soft gradient edge runs along it
     // from its first point (the lower end in the markup) to the other; the whole drawing follows the loading,
     // the logo and the phrase under it come in near the end; then the hero curtain rises over it all
@@ -164,12 +167,40 @@
         var H_PHASE = 0.25; // horizontals come first, within this share; the rest go after them in random order
         var BRAND_AT = 0.8; // the logo starts coming in at this share of the drawing, before the last lines settle
 
-        // logo out of blur, the phrase a moment later; started from render(), awaited by done()
-        var brandIn = gsap.timeline({ paused: true })
-            .fromTo(logo, { opacity: 0, filter: 'blur(8px)' },
-                { opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'sine.out' })
-            .fromTo(phrase, { opacity: 0, filter: 'blur(6px)' },
-                { opacity: 0.75, filter: 'blur(0px)', duration: 1, ease: 'sine.out' }, 0.45);
+        // mobile: at the phone's scale the 3 pattern rows cover only ~60% of the height, so one more row goes on
+        // each side (a copy of the bottom row above the top one, of the top row under the bottom one) and the
+        // view centres on the empty middle cell (x 509..1071) where the logo sits
+        if (isMobile) {
+            var ROW = 1086; // 3 rows of 362, edge to edge
+            var flatYs = all('line', svg).filter(function (l) {
+                return l.getAttribute('y1') === l.getAttribute('y2');
+            }).map(function (l) { return +l.getAttribute('y1'); });
+            all('line', svg).forEach(function (line) {
+                var y1 = +line.getAttribute('y1'), y2 = +line.getAttribute('y2');
+                var shift = Math.min(y1, y2) >= 723 ? -ROW : Math.max(y1, y2) <= 364 ? ROW : 0;
+                if (!shift) return;
+                // a copied edge that lands on an existing one would be drawn twice
+                if (y1 === y2 && flatYs.some(function (y) { return Math.abs(y - (y1 + shift)) < 1; })) return;
+                var copy = line.cloneNode();
+                copy.setAttribute('y1', y1 + shift);
+                copy.setAttribute('y2', y2 + shift);
+                svg.appendChild(copy);
+            });
+            svg.setAttribute('viewBox', '-34 -362 1647 1810');
+        }
+
+        // logo out of blur, the phrase a moment later; started from render(), awaited by done().
+        // Mobile: no animated blur (choppy in iOS Safari and snaps sharp at the end), a short rise instead
+        var brandIn = gsap.timeline({ paused: true });
+        if (isMobile) {
+            brandIn.fromTo(logo, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1.1, ease: 'sine.out' })
+                .fromTo(phrase, { opacity: 0, y: 8 }, { opacity: 0.75, y: 0, duration: 1, ease: 'sine.out' }, 0.45);
+        } else {
+            brandIn.fromTo(logo, { opacity: 0, filter: 'blur(8px)' },
+                    { opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'sine.out' })
+                .fromTo(phrase, { opacity: 0, filter: 'blur(6px)' },
+                    { opacity: 0.75, filter: 'blur(0px)', duration: 1, ease: 'sine.out' }, 0.45);
+        }
 
         var lines = all('line', svg).map(function (line, i) {
             var x1 = +line.getAttribute('x1'), y1 = +line.getAttribute('y1');
@@ -394,32 +425,18 @@
         });
     }
 
-    // Villa banners behave like full-screen steps: one wheel gesture moves exactly one banner,
-    // fast scrolling chains the banners one after another, and the ends of the group are free to leave.
-    // first white card grows 0.97 -> 1 as it comes up over the hero (scrubbed).
-    // Not on mobile: iOS Safari stops painting the architecture video inside this clipped, rounded card
-    // while its transform changes (blank box after scrolling back up); 2% isn't visible on a phone anyway
-    function firstCardScale() {
-        var card = document.querySelector('.white_card:not(.white_card_next)');
-        if (!card || isMobile) return;
-        gsap.fromTo(card,
-            { scale: 0.98, transformOrigin: '50% 0%' },
-            {
-                scale: 1,
-                ease: 'none',
-                scrollTrigger: { trigger: card, start: 'top bottom', end: 'top 35%', scrub: true }
-            });
-    }
-
     // hero depth on scroll: the photo lags behind the page, the title lags less and fades out (scrubbed both ways).
-    // Uses y (px), not the intro's yPercent/scale on the photo, so the two never fight. Mobile too: the photo
-    // isn't inside a clipped card, so the iOS video issue from firstCardScale doesn't apply here
+    // Uses y (px), not the intro's yPercent/scale on the photo, so the two never fight.
+    // Mobile: the title only fades. Moving layers from JS against native touch scroll lands a frame late on iOS,
+    // so the photo and title shook while the white card came up
+    // (the white card itself no longer scales on the way in either: re-rendering that big card with its video
+    // every frame cost more than the 2% was worth)
     function heroParallax() {
         var hero = document.querySelector('.hero');
         var media = document.querySelector('.hero_media');
         var content = document.querySelector('.hero_content');
         if (!hero) return;
-        if (media) {
+        if (media && !isMobile) {
             gsap.to(media, {
                 y: function () { return hero.offsetHeight * 0.3; },
                 ease: 'none',
@@ -427,13 +444,13 @@
             });
         }
         if (content) {
-            gsap.set(content, { x: 0, xPercent: -50 }); // keep the CSS centering (translateX(-50%)) as GSAP's own transform
-            gsap.to(content, {
-                y: function () { return hero.offsetHeight * 0.15; },
-                opacity: 0,
-                ease: 'none',
-                scrollTrigger: { trigger: hero, start: 'top top', end: '60% top', scrub: true, invalidateOnRefresh: true }
-            });
+            var fade = { opacity: 0, ease: 'none',
+                scrollTrigger: { trigger: hero, start: 'top top', end: '60% top', scrub: true, invalidateOnRefresh: true } };
+            if (!isMobile) {
+                gsap.set(content, { x: 0, xPercent: -50 }); // keep the CSS centering (translateX(-50%)) as GSAP's own transform
+                fade.y = function () { return hero.offsetHeight * 0.15; };
+            }
+            gsap.to(content, fade);
         }
         // the button steps away as soon as the page moves down and comes back at the very top
         // (a class, not a tween: the intro owns the button's opacity)
@@ -467,6 +484,8 @@
             });
     }
 
+    // Villa banners behave like full-screen steps: one wheel gesture moves exactly one banner,
+    // fast scrolling chains the banners one after another, and the ends of the group are free to leave
     function setupSnap() {
         if (!lenis) return;
         if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -592,7 +611,6 @@
         all('[data-anim="stagger"]').forEach(staggerItems);
         all('[data-anim="count"]').forEach(countUp);
 
-        firstCardScale();
         heroParallax();
         footerReveal();
         setupSnap();
