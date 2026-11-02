@@ -395,9 +395,28 @@ document.querySelectorAll('.stories').forEach(function (root) {
     obs.observe(first);
 })();
 
+// Fixed layers that come and go (pill, its veil, the glass drawer) leave the render tree when hidden:
+// Safari 26 colours its bars from fixed elements at the screen edges even at opacity 0 / visibility hidden,
+// and caught the pill mid fade-out (a grey strip under the footer); only display: none takes them out.
+// On: back in the tree first (and a reflow), so the class change after it still animates.
+// Off: display: none once the CSS fade-out (delay ms) is over
+function presence(el, on, delay) {
+    if (!el) return;
+    clearTimeout(el._presenceTimer);
+    if (on) {
+        if (el.style.display === 'none') {
+            el.style.display = '';
+            void el.offsetWidth;
+        }
+    } else if (el.style.display !== 'none') {
+        el._presenceTimer = setTimeout(function () { el.style.display = 'none'; }, delay);
+    }
+}
+
 // Pill header: shows up once the hero has scrolled out of view, expands into the menu
 (function () {
     var bar = document.querySelector('.sticky_header');
+    var fade = document.querySelector('.sticky_fade');
     var hero = document.querySelector('.hero');
     if (!bar || !hero) return;
 
@@ -414,6 +433,9 @@ document.querySelectorAll('.stories').forEach(function (root) {
 
     function render() {
         var show = (pastHero && !(atFooter && window.innerWidth <= 767)) || open;
+        // the CSS fade-outs: pill 0.6s, veil 0.5s
+        presence(bar, show, 700);
+        presence(fade, show, 700);
         bar.classList.toggle('is-visible', show);
         bar.classList.toggle('is-open', open);
         document.documentElement.classList.toggle('menu-open', open);
@@ -535,6 +557,7 @@ function docBox(el) {
     function setOpen(value) {
         if (open === value) return;
         open = value;
+        presence(drawer, open, 700); // the CSS close is 0.6s
         drawer.classList.toggle('is-open', open);
         drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
         heroMenu.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -550,6 +573,7 @@ function docBox(el) {
         if (open && Math.abs(window.scrollY - openedAt) > 60) setOpen(false);
     }, { passive: true });
 
+    drawer.style.display = 'none'; // closed: out of the render tree (see presence())
     heroMenu.setAttribute('aria-controls', 'hero-menu');
     heroMenu.setAttribute('aria-expanded', 'false');
     heroMenu.addEventListener('click', function () { setOpen(!open); });

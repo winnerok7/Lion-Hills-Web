@@ -2205,8 +2205,8 @@ html.is-loading .hero {
     }
 
     /* pill floats at the bottom, 10% smaller; the menu opens upwards above the bar.
-       Hidden, it only sinks 10px: at 24px it crossed the screen edge, and Safari 26 then filled its see-through
-       bottom bar with the pill's dark colour (a grey strip whenever the pill stepped aside for the footer) */
+       Hidden, it only sinks 10px, so even mid fade-out it never crosses the screen edge (Safari 26 colours its
+       bottom bar from fixed elements there; once faded, scripts.js takes it out with display: none) */
     .sticky_header {
         top: auto;
         bottom: calc(16px + env(safe-area-inset-bottom));
