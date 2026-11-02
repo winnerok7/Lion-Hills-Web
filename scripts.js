@@ -672,6 +672,235 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
     });
 })();
 
+// Request popup (quiz): pops up once the "Готовність комплексу 2027" block is on screen.
+// Steps: property type -> way to contact (nothing picked up front, "next" waits for a choice) -> name + phone, then a thank-you.
+// Once per visit (sessionStorage), never again after a sent request (localStorage). No backend yet
+(function () {
+    var quiz = document.querySelector('.quiz');
+    var trigger = document.querySelector('[data-quiz-trigger] .ready_box');
+    if (!quiz || !trigger) return;
+    var SEEN = 'lh-quiz-seen', SENT = 'lh-quiz-sent';
+    // ?quiz in the address forgets both (for testing)
+    if (/[?&]quiz\b/.test(location.search)) {
+        try { localStorage.removeItem(SENT); sessionStorage.removeItem(SEEN); } catch (e) {}
+    }
+    try { if (localStorage.getItem(SENT) || sessionStorage.getItem(SEEN)) return; } catch (e) {}
+
+    var form = quiz.querySelector('.quiz_box');
+    var steps = quiz.querySelectorAll('.quiz_step');
+    var bar = quiz.querySelector('.quiz_bar');
+    var segs = bar.querySelectorAll('i');
+    var prev = quiz.querySelector('.quiz_prev');
+    var next = quiz.querySelector('.quiz_next');
+    var submit = quiz.querySelector('.quiz_submit');
+    var name = form.elements.name;
+    var phone = form.elements.phone;
+    var codeBtn = quiz.querySelector('.quiz_code');
+    var list = quiz.querySelector('.quiz_countries');
+    var current = 0;
+    var open = false;
+    var lastFocus = null;
+
+    // Ukraine first, then Europe A-Z; min / max digits after the code (Ukraine has the XX XXX XXXX mask)
+    var FLAGS = 'https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/';
+    var countries = [
+        ['ua', 'Україна', '+380', 9, 9],
+        ['at', 'Австрія', '+43'], ['be', 'Бельгія', '+32'], ['bg', 'Болгарія', '+359'], ['gb', 'Велика Британія', '+44'],
+        ['gr', 'Греція', '+30'], ['ge', 'Грузія', '+995'], ['dk', 'Данія', '+45'], ['ee', 'Естонія', '+372'],
+        ['ie', 'Ірландія', '+353'], ['is', 'Ісландія', '+354'], ['es', 'Іспанія', '+34'], ['it', 'Італія', '+39'],
+        ['cy', 'Кіпр', '+357'], ['lv', 'Латвія', '+371'], ['lt', 'Литва', '+370'], ['lu', 'Люксембург', '+352'],
+        ['mt', 'Мальта', '+356'], ['md', 'Молдова', '+373'], ['mc', 'Монако', '+377'], ['nl', 'Нідерланди', '+31'],
+        ['de', 'Німеччина', '+49'], ['no', 'Норвегія', '+47'], ['pl', 'Польща', '+48'], ['pt', 'Португалія', '+351'],
+        ['ro', 'Румунія', '+40'], ['rs', 'Сербія', '+381'], ['sk', 'Словаччина', '+421'], ['si', 'Словенія', '+386'],
+        ['hu', 'Угорщина', '+36'], ['fi', 'Фінляндія', '+358'], ['fr', 'Франція', '+33'], ['hr', 'Хорватія', '+385'],
+        ['me', 'Чорногорія', '+382'], ['cz', 'Чехія', '+420'], ['ch', 'Швейцарія', '+41'], ['se', 'Швеція', '+46']
+    ].map(function (c) { return { iso: c[0], name: c[1], code: c[2], min: c[3] || 6, max: c[4] || 12 }; });
+    var country = countries[0];
+
+    countries.forEach(function (c, i) {
+        var li = document.createElement('li');
+        li.innerHTML = '<button class="quiz_country" type="button" role="option" aria-selected="' + (i === 0) + '">' +
+            '<img class="quiz_flag" loading="lazy" src="' + FLAGS + c.iso + '.svg" alt="">' + c.name + '<span>' + c.code + '</span></button>';
+        li.firstChild.addEventListener('click', function () { pickCountry(c); });
+        list.appendChild(li);
+    });
+    var options = list.querySelectorAll('.quiz_country');
+
+    // phones: the native picker instead of the list (it shows emoji flags there), invisible over the code button
+    var select = document.createElement('select');
+    select.className = 'quiz_code_select';
+    select.setAttribute('aria-label', 'Код країни');
+    countries.forEach(function (c) {
+        var flag = c.iso.toUpperCase().replace(/./g, function (ch) { return String.fromCodePoint(0x1F1A5 + ch.charCodeAt(0)); });
+        select.add(new Option(flag + ' ' + c.name + ' ' + c.code));
+    });
+    select.addEventListener('change', function () { pickCountry(countries[select.selectedIndex]); });
+    codeBtn.parentNode.insertBefore(select, codeBtn.nextSibling);
+
+    function setList(value, refocus) {
+        list.hidden = !value;
+        codeBtn.setAttribute('aria-expanded', value ? 'true' : 'false');
+        if (value) {
+            var sel = options[countries.indexOf(country)];
+            list.scrollTop = sel.offsetTop - list.clientHeight / 2 + sel.offsetHeight / 2;
+            sel.focus({ preventScroll: true });
+        } else if (refocus) {
+            codeBtn.focus();
+        }
+    }
+
+    function pickCountry(c) {
+        country = c;
+        options.forEach(function (el, i) { el.setAttribute('aria-selected', countries[i] === c ? 'true' : 'false'); });
+        codeBtn.querySelector('.quiz_flag').src = FLAGS + c.iso + '.svg';
+        codeBtn.querySelector('.quiz_code_num').textContent = c.code;
+        codeBtn.setAttribute('aria-label', 'Код країни: ' + c.name + ' ' + c.code);
+        form.elements.code.value = c.code;
+        select.selectedIndex = countries.indexOf(c);
+        phone.placeholder = c.iso === 'ua' ? 'XX XXX XXXX *' : 'Номер телефону *';
+        formatPhone();
+        setList(false);
+        phone.focus();
+    }
+
+    codeBtn.addEventListener('click', function () { setList(list.hidden); });
+    // arrows move through the countries
+    list.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        var i = Array.prototype.indexOf.call(options, document.activeElement) + (e.key === 'ArrowDown' ? 1 : -1);
+        if (options[i]) options[i].focus();
+    });
+    document.addEventListener('click', function (e) {
+        if (!list.hidden && !list.contains(e.target) && !codeBtn.contains(e.target)) setList(false);
+    });
+
+    function canGoOn() {
+        if (current === 0) return !!form.querySelector('[name="type"]:checked');
+        if (current === 1) return !!form.querySelector('[name="contact"]:checked');
+        return true;
+    }
+
+    function show(index) {
+        current = index;
+        setList(false);
+        steps.forEach(function (el, i) { el.classList.toggle('active', i === index); });
+        segs.forEach(function (el, i) { el.classList.toggle('active', i <= index); });
+        bar.hidden = index > 2;
+        prev.hidden = next.hidden = index > 1;
+        submit.hidden = index !== 2;
+        prev.disabled = index === 0;
+        next.disabled = !canGoOn();
+        form.scrollTop = 0;
+        // no keyboard popping up on its own on phones
+        if (index === 2 && !isMobile) name.focus({ preventScroll: true });
+        if (index === 3) form.focus({ preventScroll: true }); // the button that had focus is gone
+    }
+
+    function setOpen(value) {
+        if (open === value) return;
+        open = value;
+        presence(quiz, open, 600); // the CSS fade-out is 0.5s
+        quiz.classList.toggle('is-open', open);
+        quiz.setAttribute('aria-hidden', open ? 'false' : 'true');
+        document.documentElement.classList.toggle('quiz-open', open);
+        if (window.lenis) { if (open) window.lenis.stop(); else window.lenis.start(); }
+        if (open) {
+            lastFocus = document.activeElement;
+            loadMediaIn(quiz);
+            form.focus({ preventScroll: true });
+        } else {
+            setList(false);
+            if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+        }
+    }
+
+    // pictures ahead of time, while the visitor is still a screen away
+    var near = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        near.disconnect();
+        loadMediaIn(quiz);
+    }, { rootMargin: '100% 0px' });
+    near.observe(trigger);
+
+    // the block's top has passed 60% of the screen height
+    var obs = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        obs.disconnect();
+        try { sessionStorage.setItem(SEEN, '1'); } catch (e) {}
+        setOpen(true);
+    }, { rootMargin: '0px 0px -40% 0px' });
+    obs.observe(trigger);
+
+    form.addEventListener('change', function () { next.disabled = !canGoOn(); });
+
+    prev.addEventListener('click', function () { show(current - 1); });
+    next.addEventListener('click', function () { if (canGoOn()) show(current + 1); });
+
+    // phone without the country code: Ukraine as XX XXX XXXX, others in groups of 3
+    // (a pasted number with its code or a leading 0 is trimmed to fit)
+    function digits() {
+        return phone.value.replace(/\D/g, '');
+    }
+
+    function formatPhone() {
+        var d = digits();
+        var dial = country.code.slice(1);
+        if (/^\s*(\+|00)/.test(phone.value)) {
+            d = d.replace(/^00/, '');
+            if (d.indexOf(dial) === 0) d = d.slice(dial.length);
+        } else if (d.length > country.max && d.indexOf(dial) === 0) d = d.slice(dial.length);
+        else if (d.length > country.max && d.charAt(0) === '0') d = d.slice(1);
+        d = d.slice(0, country.max);
+        var parts = country.iso === 'ua' ? [d.slice(0, 2), d.slice(2, 5), d.slice(5)] : d.match(/.{1,3}/g) || [];
+        phone.value = parts.filter(Boolean).join(' ');
+    }
+    phone.addEventListener('input', formatPhone);
+    // keyboard's Enter: name -> phone -> send
+    name.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); phone.focus(); }
+    });
+    [name, phone].forEach(function (el) {
+        el.addEventListener('input', function () { el.classList.remove('is-error'); });
+    });
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        // Enter on the first two steps works as "next"
+        if (current < 2) { if (canGoOn()) show(current + 1); return; }
+        if (current !== 2) return;
+        var bad = [];
+        if (!name.value.trim()) bad.push(name);
+        if (digits().length < country.min || digits().length > country.max) bad.push(phone);
+        bad.forEach(function (el) { el.classList.add('is-error'); });
+        if (bad.length) { bad[0].focus(); return; }
+        try { localStorage.setItem(SENT, '1'); } catch (e) {}
+        show(3);
+        setTimeout(function () { setOpen(false); }, 3500);
+    });
+
+    quiz.querySelector('.quiz_close').addEventListener('click', function () { setOpen(false); });
+    quiz.querySelector('.quiz_overlay').addEventListener('click', function () { setOpen(false); });
+
+    // Escape closes; Tab stays inside the popup
+    document.addEventListener('keydown', function (e) {
+        if (!open) return;
+        // Escape closes the country list first, then the popup
+        if (e.key === 'Escape') { if (!list.hidden) setList(false, true); else setOpen(false); return; }
+        if (e.key !== 'Tab') return;
+        var items = Array.prototype.filter.call(
+            quiz.querySelectorAll('button, input, a[href]'),
+            function (el) { return !el.disabled && el.offsetParent !== null && !(el.type === 'radio' && !el.checked && form.querySelector('[name="' + el.name + '"]:checked')); }
+        );
+        if (!items.length) return;
+        var first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+    show(0);
+})();
+
 // Footer "back to top": a longer Lenis glide on desktop (it's the whole page), native smooth scroll on mobile
 document.querySelectorAll('.footer_top').forEach(function (btn) {
     btn.addEventListener('click', function () {

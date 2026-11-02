@@ -1794,6 +1794,501 @@ a.drawer_card {
 }
 
 
+/* ---------- Request popup (quiz) ---------- */
+/* fixed over the whole screen; out of the render tree while closed (presence() in scripts.js) */
+
+.quiz {
+    --quiz-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: #fff;
+    pointer-events: none;
+}
+
+.quiz.is-open {
+    pointer-events: auto;
+}
+
+.quiz [hidden] {
+    display: none !important;
+}
+
+/* the page doesn't scroll under it (Lenis is stopped too); the gutter keeps the page from shifting sideways */
+html.quiz-open {
+    overflow: hidden;
+    scrollbar-gutter: stable;
+}
+
+/* down to 100lvh: Safari 26's bottom bar floats over the page below the fixed box, the page would show there undimmed */
+.quiz_overlay {
+    position: absolute;
+    inset: 0 0 auto;
+    height: max(100%, 100lvh);
+    background: rgba(0, 0, 0, 0.6);
+    touch-action: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.quiz.is-open .quiz_overlay {
+    opacity: 1;
+}
+
+.quiz_box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(880px, 100%);
+    height: min(680px, 100%);
+    padding: 52px 48px 48px;
+    border-radius: 16px;
+    background: #212121;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+    transition: opacity 0.4s ease, transform 0.6s var(--quiz-ease);
+}
+
+.quiz.is-open .quiz_box {
+    opacity: 1;
+    transform: none;
+}
+
+.quiz_box:focus {
+    outline: none;
+}
+
+.quiz_close {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    display: flex;
+    padding: 6px;
+    border: 0;
+    background: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: color 0.3s ease, rotate 0.4s var(--quiz-ease);
+}
+
+.quiz_close:hover {
+    color: #fff;
+    rotate: 90deg;
+}
+
+.quiz_bar {
+    display: flex;
+    gap: 4px;
+}
+
+.quiz_bar i {
+    width: 68px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.4s ease;
+}
+
+.quiz_bar i.active {
+    background: #fff;
+}
+
+/* only the current step is in the layout; it fades up as it comes in */
+.quiz_step {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 32px 0;
+}
+
+.quiz_step.active {
+    display: flex;
+    animation: quiz-in 0.5s var(--quiz-ease) both;
+}
+
+@keyframes quiz-in {
+    from { opacity: 0; transform: translateY(12px); }
+}
+
+.quiz_title {
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-align: center;
+}
+
+.quiz_text {
+    margin-top: 16px;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+}
+
+/* the radios themselves are only there for the keyboard / screen readers */
+.quiz_card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* step 1: three photo cards */
+.quiz_cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 760px;
+    margin-top: 44px;
+}
+
+.quiz_card {
+    position: relative;
+    aspect-ratio: 0.93;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #333;
+    cursor: pointer;
+}
+
+.quiz_card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 0.8s var(--quiz-ease);
+}
+
+.quiz_card:hover img {
+    scale: 1.05;
+}
+
+/* dark fade under the label + the white frame of the chosen card */
+.quiz_card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 45%);
+    box-shadow: inset 0 0 0 0 #fff;
+    transition: box-shadow 0.3s ease;
+}
+
+.quiz_card:has(input:checked)::after {
+    box-shadow: inset 0 0 0 2px #fff;
+}
+
+.quiz_card:has(input:focus-visible) {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.quiz_card span {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 18px;
+    z-index: 1;
+    font-size: 17px;
+    text-align: center;
+}
+
+/* step 2: radio pills */
+.quiz_options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 44px;
+}
+
+.quiz_option {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 190px;
+    height: 50px;
+    padding: 0 22px 0 18px;
+    border-radius: 8px;
+    background: #3a3a3a;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.quiz_option:hover {
+    background: #444;
+}
+
+.quiz_option:has(input:checked) {
+    background: #f2f2f2;
+    color: #161616;
+}
+
+.quiz_option:has(input:focus-visible) {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.quiz_option input {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    margin: 0 4px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.quiz_option input:checked {
+    border-color: #161616;
+    background: #161616;
+}
+
+.quiz_option svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+}
+
+/* step 3: name + phone */
+.quiz_fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 340px;
+    margin-top: 44px;
+}
+
+.quiz_phone {
+    position: relative;
+    display: grid;
+    grid-template-columns: 118px 1fr;
+    gap: 8px;
+}
+
+.quiz_input,
+.quiz_code {
+    height: 50px;
+    border-radius: 8px;
+    background: #3a3a3a;
+    color: #fff;
+    font: inherit;
+    font-size: 15px;
+}
+
+.quiz_input {
+    width: 100%;
+    min-width: 0;
+    padding: 0 16px;
+    border: 0;
+    outline: none;
+    box-shadow: inset 0 0 0 1px transparent;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.quiz_input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.quiz_input:focus {
+    background: #424242;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.quiz_input.is-error {
+    box-shadow: inset 0 0 0 1px #e0806c;
+}
+
+/* country code: a button that opens the list under the phone row */
+.quiz_code {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 14px;
+    border: 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.quiz_code:hover,
+.quiz_code[aria-expanded="true"] {
+    background: #424242;
+}
+
+.quiz_code:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* phones: the native picker lies invisibly over the code button (scripts.js adds it) */
+.quiz_code_select {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 118px;
+    height: 50px;
+    opacity: 0;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.quiz_flag {
+    flex-shrink: 0;
+    width: 18px;
+    height: 13.5px;
+    border-radius: 2px;
+    object-fit: cover;
+}
+
+.quiz_code_chevron {
+    flex-shrink: 0;
+    margin-left: auto;
+    opacity: 0.6;
+    transition: rotate 0.3s var(--quiz-ease);
+}
+
+.quiz_code[aria-expanded="true"] .quiz_code_chevron {
+    rotate: 180deg;
+}
+
+.quiz_countries {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 2;
+    max-height: 220px;
+    padding: 6px;
+    border-radius: 8px;
+    background: #2e2e2e;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    list-style: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    animation: quiz-in 0.3s var(--quiz-ease) both;
+}
+
+.quiz_country {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 40px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.quiz_country:hover,
+.quiz_country:focus-visible {
+    background: #3a3a3a;
+    outline: none;
+}
+
+.quiz_country[aria-selected="true"] {
+    background: #424242;
+}
+
+.quiz_country span {
+    margin-left: auto;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.quiz_note {
+    margin-top: 6px;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.quiz_nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 50px;
+}
+
+.quiz_arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #ebebeb;
+    color: #555;
+    cursor: pointer;
+    transition: scale 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+}
+
+.quiz_prev {
+    background: #2e2e2e;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.quiz_arrow:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+@media (hover: hover) {
+    .quiz_arrow:not(:disabled):hover {
+        scale: 0.94;
+    }
+}
+
+.quiz_arrow:focus-visible,
+.quiz_close:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.quiz_submit {
+    --btn-bg: #f2f2f2;
+    padding: 18px 38px;
+    font-size: 15px;
+    color: #161616;
+}
+
+.quiz_submit:focus-visible {
+    outline-color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quiz_box {
+        transform: none;
+    }
+
+    .quiz_step.active {
+        animation: none;
+    }
+}
+
+
 /* ---------- FAQ ---------- */
 
 .faq {
@@ -3257,5 +3752,77 @@ html.is-loading .hero {
         align-self: flex-start;
         margin-bottom: 20px;
         font-size: 14px;
+    }
+
+    /* request popup: nearly full screen; photo cards become wide rows, pills stack */
+    .quiz {
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+    }
+
+    .quiz_box {
+        width: 100%;
+        height: min(640px, 100%);
+        padding: 32px 16px 20px;
+        border-radius: 20px;
+    }
+
+    .quiz_close {
+        top: 14px;
+        right: 14px;
+    }
+
+    .quiz_bar i {
+        width: 48px;
+    }
+
+    .quiz_step {
+        padding: 24px 0;
+    }
+
+    .quiz_title {
+        max-width: 280px;
+        font-size: 24px;
+    }
+
+    .quiz_cards {
+        grid-template-columns: 1fr;
+        margin-top: 24px;
+    }
+
+    .quiz_card {
+        aspect-ratio: auto;
+        height: min(116px, 15svh);
+    }
+
+    .quiz_card span {
+        bottom: 14px;
+        font-size: 16px;
+    }
+
+    .quiz_options {
+        flex-direction: column;
+        width: 100%;
+        margin-top: 28px;
+    }
+
+    .quiz_fields {
+        max-width: none;
+        margin-top: 28px;
+    }
+
+    /* name + phone sit higher, out of the keyboard's way */
+    .quiz_step[data-step="2"] {
+        justify-content: flex-start;
+        padding-top: 8svh;
+    }
+
+    .quiz_code_select {
+        display: block;
+    }
+
+    /* 16px: iOS zooms the page into smaller inputs */
+    .quiz_input,
+    .quiz_code {
+        font-size: 16px;
     }
 }
