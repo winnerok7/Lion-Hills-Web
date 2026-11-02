@@ -626,6 +626,36 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
     });
 });
 
+// Cookie notice (desktop card / mobile strip in the hero): comes in once the hero intro has played,
+// "Добре" hides it for good. The choice lives in localStorage; if storage is blocked it simply shows again next time
+(function () {
+    var box = document.querySelector('.cookie');
+    if (!box) return;
+    var KEY = 'lh-cookies-ok';
+    try { if (localStorage.getItem(KEY)) return; } catch (e) {}
+
+    // animations.js fires 'loader:done' as the hero curtain starts; the hero texts take ~2.5s more
+    var introOver = new Promise(function (resolve) {
+        if (!document.documentElement.classList.contains('is-loading')) return resolve();
+        window.addEventListener('loader:done', function () { resolve(); }, { once: true });
+        setTimeout(resolve, CRITICAL_MAX + 5000); // animations.js failed
+    });
+
+    introOver.then(function () {
+        setTimeout(function () {
+            box.hidden = false;
+            void box.offsetWidth; // in the layout first, so the fade-up runs
+            box.classList.add('is-visible');
+        }, 2600);
+    });
+
+    box.querySelector('.cookie_btn').addEventListener('click', function () {
+        try { localStorage.setItem(KEY, '1'); } catch (e) {}
+        box.classList.remove('is-visible');
+        setTimeout(function () { box.hidden = true; }, 700);
+    });
+})();
+
 // Footer "back to top": a longer Lenis glide on desktop (it's the whole page), native smooth scroll on mobile
 document.querySelectorAll('.footer_top').forEach(function (btn) {
     btn.addEventListener('click', function () {

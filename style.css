@@ -1709,6 +1709,70 @@ a.drawer_card {
     opacity: 0.7;
 }
 
+/* cookie notice: white card in the bottom-left corner (it sits in the hero's markup, fixed here; the mobile block
+   turns it into a strip inside the hero); fades up once scripts.js drops [hidden] */
+.cookie {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    z-index: 55;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    width: 470px;
+    padding: 24px 24px 26px 28px;
+    border-radius: 28px;
+    background: #fff;
+    color: #111;
+    text-align: left;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cookie[hidden] {
+    display: none;
+}
+
+.cookie.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+.cookie_label {
+    font-size: 14px;
+    color: #888;
+}
+
+.cookie_text {
+    margin-top: 12px;
+    font-size: 21px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+}
+
+.cookie_text a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: opacity 0.3s ease;
+}
+
+.cookie_text a:hover {
+    opacity: 0.6;
+}
+
+.cookie_btn {
+    --btn-bg: #ebeae6;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 18px 24px;
+    border-radius: calc(20px * var(--btn-k));
+    color: #161616;
+}
+
 
 /* ---------- FAQ ---------- */
 
@@ -2318,6 +2382,46 @@ html.is-loading .hero {
         top: auto;
         bottom: calc(86px + env(safe-area-inset-bottom));
         transform: translate(-50%, 12px);
+    }
+
+    /* cookie notice: a slim full-width strip in the hero, under the "Запис на перегляд" button
+       (the button's bottom is at 85svh + 5vh - 24px from the hero's top), scrolling with the page.
+       Not fixed: Safari 26 would colour its bottom bar from a wide fixed element near the edge */
+    .cookie {
+        position: absolute;
+        top: calc(90vh - 6px);
+        top: calc(85svh + 5vh - 6px);
+        left: 12px;
+        right: 12px;
+        bottom: auto;
+        z-index: 3;
+        gap: 12px;
+        width: auto;
+        padding: 8px 8px 8px 16px;
+        border-radius: 16px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+        transform: translateY(10px);
+    }
+
+    .cookie_label {
+        display: none;
+    }
+
+    .cookie_text {
+        margin-top: 0;
+        font-size: 13px;
+        line-height: 1.25;
+        letter-spacing: 0;
+    }
+
+    .cookie_text a {
+        text-underline-offset: 2px;
+    }
+
+    .cookie_btn {
+        padding: 12px 16px;
+        border-radius: calc(12px * var(--btn-k));
+        font-size: 14px;
     }
 
     /* no veil on mobile: a full-width fixed layer at the bottom edge is exactly what Safari 26 takes its bar colour
