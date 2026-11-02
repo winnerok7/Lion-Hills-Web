@@ -285,13 +285,16 @@ body {
     line-height: 1.4;
     color: #6e6e73;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0s linear 0.2s;
 }
 
-/* captions share one cell: the old one is gone before the new one comes in, so they never overlap */
+/* captions share one cell: the old one is gone before the new one comes in, so they never overlap;
+   visibility too, since iOS Safari sometimes keeps painting the faded-out text */
 .gallery_caption.active {
     opacity: 1;
-    transition: opacity 0.35s ease 0.2s;
+    visibility: visible;
+    transition: opacity 0.35s ease 0.2s, visibility 0s 0.2s;
 }
 
 .gallery_caption strong {
@@ -2260,7 +2263,7 @@ html.is-loading .hero {
     }
 
     .hero_media {
-        background-image: url('media/hero_mob.JPG');
+        background-image: url('media/vert hero mob new.png');
     }
 
     .hero_content {
@@ -2694,6 +2697,12 @@ html.is-loading .hero {
 
     .lots .carousel_track {
         margin-top: 28px;
+    }
+
+    /* empty room after the last plan, so it can scroll to the left edge like the others (85% card + 12px gap) */
+    .lots .carousel_track::after {
+        content: "";
+        flex: 0 0 calc(15% - 12px);
     }
 
     .lots .carousel_card,

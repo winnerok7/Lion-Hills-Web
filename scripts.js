@@ -279,9 +279,19 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
     var prev = root.querySelector('.carousel_prev');
     var next = root.querySelector('.carousel_next');
 
-    function step() {
-        var card = track.querySelector('.carousel_card');
-        return card.getBoundingClientRect().width + 20;
+    // go to the next / previous card's own position (not a fixed step: the gap differs on mobile,
+    // and iOS doesn't re-snap after a programmatic scroll, so any error would add up)
+    function go(dir) {
+        var pad = parseFloat(getComputedStyle(track).scrollPaddingLeft) || 0;
+        var base = track.getBoundingClientRect().left - track.scrollLeft + pad;
+        var pos = track.scrollLeft;
+        var target = null;
+        track.querySelectorAll('.carousel_card').forEach(function (card) {
+            var x = card.getBoundingClientRect().left - base;
+            if (dir > 0 && target === null && x > pos + 1) target = x;
+            if (dir < 0 && x < pos - 1) target = x;
+        });
+        if (target !== null) track.scrollTo({ left: target, behavior: 'smooth' });
     }
 
     function update() {
@@ -289,8 +299,8 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
     }
 
-    prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
-    next.addEventListener('click', function () { track.scrollBy({ left: step(), behavior: 'smooth' }); });
+    prev.addEventListener('click', function () { go(-1); });
+    next.addEventListener('click', function () { go(1); });
     track.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
     update();
