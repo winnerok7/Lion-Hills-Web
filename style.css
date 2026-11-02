@@ -1353,7 +1353,9 @@ body {
     transition: opacity 0.2s ease, visibility 0s linear 0.2s;
 }
 
-.sticky_header_wa {
+/* messenger buttons at the end of the pill: WhatsApp, then Telegram */
+.sticky_header_wa,
+.sticky_header_tg {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1367,13 +1369,27 @@ body {
     transition: scale 0.3s ease;
 }
 
-.sticky_header_wa:hover {
+.sticky_header_tg {
+    margin-left: 8px;
+    background: #2C90BF;
+}
+
+.sticky_header_wa:hover,
+.sticky_header_tg:hover {
     scale: 0.95;
 }
 
-.sticky_header_wa svg {
+.sticky_header_wa svg,
+.sticky_header_tg svg {
     width: 24px;
     height: 24px;
+}
+
+/* the plane sits a touch left of centre in its box */
+.sticky_header_tg svg {
+    width: 22px;
+    height: 22px;
+    margin-left: -2px;
 }
 
 /* hero menu: frosted glass drawer that drops from the top right */
@@ -2304,9 +2320,16 @@ html.is-loading .hero {
         font-size: 15px;
     }
 
+    /* the pill can't get wider (it must stay under 80% of the screen, see above), so to fit Telegram
+       the menu button is just the burger here: no "Меню" / "Закрити" (aria-label keeps its name) */
     .sticky_header_menu {
-        gap: 17px;
+        padding: 10px;
         font-size: 14.5px;
+    }
+
+    .sticky_header .sticky_header_label,
+    .sticky_header.is-open .sticky_header_label_close {
+        display: none;
     }
 
     .sticky_header_icon,
@@ -2320,15 +2343,28 @@ html.is-loading .hero {
         height: 13px;
     }
 
-    .sticky_header_wa {
+    .sticky_header_wa,
+    .sticky_header_tg {
         width: 40px;
         height: 40px;
-        margin-left: 16px;
+    }
+
+    .sticky_header_wa {
+        margin-left: 6px;
+    }
+
+    .sticky_header_tg {
+        margin-left: 6px;
     }
 
     .sticky_header_wa svg {
         width: 22px;
         height: 22px;
+    }
+
+    .sticky_header_tg svg {
+        width: 20px;
+        height: 20px;
     }
 
     .sticky_header_panel {
@@ -2381,12 +2417,23 @@ html.is-loading .hero {
         padding: 16px 10px;
     }
 
-    /* above the bottom pill; hidden for now */
+    /* above the bottom pill (16px + 60px, then 10px); while the cookie strip is up it rides over it too.
+       Narrow and well off the edge, so Safari 26 doesn't take its bar colour from it */
     .plan_download {
-        display: none;
         top: auto;
         bottom: calc(86px + env(safe-area-inset-bottom));
+        height: 38px;
+        padding: 0 16px;
         transform: translate(-50%, 12px);
+        transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), translate 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.6s;
+    }
+
+    .plan_download.is-visible {
+        transition: opacity 0.4s ease 0.5s, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s, translate 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 0.5s;
+    }
+
+    .cookie-on .plan_download {
+        translate: 0 -62px;
     }
 
     /* cookie notice: a slim full-width strip that stays at the bottom of the screen. 20px up, not at the edge:
