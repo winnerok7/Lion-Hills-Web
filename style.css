@@ -599,6 +599,11 @@ body {
     color: #fff;
 }
 
+/* the copy of the button under the cards: mobile only (two classes: .btn-soft further down sets display too) */
+.lots .lots_btn_mobile {
+    display: none;
+}
+
 /* "soft press" button (Framer reference): on hover the whole button shrinks to 0.95 and its corners grow 12px -> 20px.
    Uses the `scale` property, not `transform`, so it doesn't fight translateX centering or GSAP's y.
    Colour comes from --btn-bg / color on the button's own class. */
@@ -921,7 +926,8 @@ body {
     z-index: 3;
 }
 
-.stories_prev[hidden] {
+.stories_prev[hidden],
+.stories_next[hidden] {
     display: none;
 }
 
@@ -1115,6 +1121,15 @@ body {
 
 .sticky_header.is-open {
     border-radius: 27px;
+}
+
+/* desktop: the whole pill (and its open menu) 10% smaller. Scaled from its left edge, which the
+   translate(-50%) puts on the screen centre, so it stays centred; the top stays at 32px */
+@media (min-width: 768px) {
+    .sticky_header {
+        scale: 0.9;
+        transform-origin: 0 0;
+    }
 }
 
 /* the veil's colour, animatable (registered), so it can live in a gradient */
@@ -1684,7 +1699,7 @@ a.drawer_card {
 /* villa floorplan download: under the pill while a villa banner is on screen */
 .plan_download {
     position: fixed;
-    top: 106px;
+    top: 99px; /* 8px under the pill (32px + 66px scaled to 0.9) */
     left: 50%;
     z-index: 50;
     display: flex;
@@ -2219,7 +2234,20 @@ html.quiz-open {
 .quiz_note {
     margin-top: 6px;
     font-size: 10px;
+    line-height: 1.4;
     color: rgba(255, 255, 255, 0.4);
+}
+
+.quiz_note a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color 0.3s ease;
+}
+
+.quiz_note a:hover {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .quiz_nav {
@@ -2276,6 +2304,13 @@ html.quiz-open {
 
 .quiz_submit:focus-visible {
     outline-color: #fff;
+}
+
+/* while the request is out (scripts.js withSending) */
+.quiz_submit:disabled,
+.footer_submit:disabled {
+    opacity: 0.7;
+    cursor: default;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2520,14 +2555,21 @@ html.quiz-open {
     transition: scale 0.3s ease;
 }
 
-.footer_submit:hover {
+.footer_submit:hover:not(:disabled) {
     scale: 0.96;
 }
 
 .footer_note {
     margin-top: 16px;
     font-size: 10px;
+    line-height: 1.4;
     color: rgba(255, 255, 255, 0.4);
+}
+
+.footer .footer_note a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
 }
 
 .footer_col {
@@ -2575,12 +2617,16 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-stopped { overflow: hidden; }
 [data-lenis-prevent] { overscroll-behavior: contain; }
 
-/* hidden until GSAP takes over (only when JS is on and motion is allowed) */
+/* hidden until GSAP takes over (only when JS is on and motion is allowed).
+   Not the hero title: it is the page's LCP element (Chrome skips the full-screen hero photo as a background),
+   so it gets painted right away, under the opaque loader where nobody sees it; the intro hides its lines
+   under their masks as the curtain starts and slides them up as before */
 .js-anim [data-anim='lines'],
 .js-anim [data-anim='scrub'],
 .js-anim [data-anim='fade'],
 .js-anim [data-anim='fade-only'],
-.js-anim [data-anim^='hero-'],
+.js-anim [data-anim='hero-fade'],
+.js-anim [data-anim='hero-header'],
 .js-anim [data-anim='stagger'] > * {
     visibility: hidden;
 }
@@ -2744,11 +2790,8 @@ html:not(.js-anim) .loader {
     opacity: 0;
 }
 
-/* hero sits above the loader and opens like a curtain from the bottom */
-html.is-loading .hero {
-    z-index: 101;
-    clip-path: inset(100% 0 0 0);
-}
+/* the hero sits under the loader (painted from the start, for LCP); animations.js cuts the loader away from the
+   bottom up, so it looks like the hero opening as a curtain. The old order (hero above, clipped): variants/original loader */
 
 /* hero photo parallax as a CSS scroll-driven animation (mobile, see the mobile block): `translate`, so it adds
    to the intro's GSAP transform instead of fighting it; 30% of the photo layer = 30% of the hero height */
@@ -3326,8 +3369,12 @@ html.is-loading .hero {
         text-align: left;
     }
 
+    /* svh, not vh: on iOS vh is the large viewport (browser bars hidden), so with the bars showing a 92vh banner
+       ran past the screen on phones with taller bars (iPhone 14-16 with the Dynamic Island). svh = the visible
+       height with the bars out, so it always fits; dvh would resize the banners mid-scroll */
     .stories {
         height: 92vh;
+        height: 92svh;
         min-height: 520px;
         margin-top: 20px;
         border-radius: 16px;
@@ -3464,6 +3511,27 @@ html.is-loading .hero {
         background: rgba(40, 40, 40, 0.75) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M13 6l6 6-6 6'/%3E%3C/svg%3E") center / 14px no-repeat;
     }
 
+    /* the same arrow, mirrored, in the left tap zone from the second slide on (scripts.js hides the zone on the first) */
+    .stories_prev::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        width: 32px;
+        height: 32px;
+        margin-top: -16px;
+        border-radius: 50%;
+        background: rgba(210, 210, 215, 0.64) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5'/%3E%3Cpath d='M11 6l-6 6 6 6'/%3E%3C/svg%3E") center / 14px no-repeat;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        pointer-events: none;
+    }
+
+    .stories:has(.stories_slide.active .plan_floors) .stories_prev::after {
+        top: calc(50% + 102.5px);
+        background: rgba(40, 40, 40, 0.75) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5'/%3E%3Cpath d='M11 6l-6 6 6 6'/%3E%3C/svg%3E") center / 14px no-repeat;
+    }
+
     /* bottom room keeps the floor pills clear of the bottom pill / cookie strip over the banner's lower edge */
     .stories_plan {
         padding: 72px 16px 90px;
@@ -3565,36 +3633,23 @@ html.is-loading .hero {
     }
 
     /* ---------- lots: button goes under the cards, arrows under the button ---------- */
+    /* plain blocks like the other carousels, no flex / display: contents around the track: in a flex parent
+       iOS Safari re-lays out the (stretched) track on any change next to it, e.g. the "back" arrow getting
+       enabled as a swipe starts, and after that layout it re-snaps the track to the old snap point,
+       so a swipe bounced back to the first plan. The button sits inside .carousel instead (.lots_btn_mobile) */
     .lots {
         --gutter: 16px;
-        display: flex;
-        flex-direction: column;
         padding: 0 0 100px;
     }
 
-    .lots_head {
-        display: contents;
-    }
-
-    .lots_head > div {
-        padding: 0 var(--gutter);
-    }
-
-    .lots .carousel {
-        display: contents;
-    }
-
-    .lots .carousel_track {
-        order: 1;
-    }
-
-    .lots .carousel_nav {
-        order: 3;
-    }
-
     .lots_head .lots_btn {
-        order: 2;
-        align-self: flex-start;
+        display: none;
+    }
+
+    /* a block as wide as its text: no line box around it, so the gaps are exactly 28px above and 24px below */
+    .lots .lots_btn_mobile {
+        display: block;
+        width: fit-content;
         margin: 28px var(--gutter) 0;
     }
 

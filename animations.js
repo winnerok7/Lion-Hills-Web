@@ -173,7 +173,7 @@
         var BAND = 0.6;   // soft edge, as a share of the line length
         var DUR = 0.3;    // one line's reveal, as a share of the whole loader
         var H_PHASE = 0.25; // horizontals come first, within this share; the rest go after them in random order
-        var BRAND_AT = 0.8; // the logo starts coming in at this share of the drawing, before the last lines settle
+        var BRAND_AT = 0.6; // the logo starts coming in at this share of the drawing, before the last lines settle
 
         // mobile: at the phone's scale the 3 pattern rows cover only ~60% of the height, so more rows go around
         // them: a copy of the bottom row above the top one, of the top row under the bottom one (5 rows in view),
@@ -257,15 +257,17 @@
         function done() {
             return new Promise(function (resolve) {
                 brandIn.play(); // in case the drawing jumped past BRAND_AT
-                brandIn.eventCallback('onComplete', function () { setTimeout(resolve, 500); });
-                if (brandIn.progress() === 1) setTimeout(resolve, 500);
+                brandIn.eventCallback('onComplete', function () { setTimeout(resolve, 400); });
+                if (brandIn.progress() === 1) setTimeout(resolve, 400);
             });
         }
 
-        return { render: render, minLap: 5, done: done }; // 35 lines: a slower lap than v1's 4s minimum
+        // 4.5s drawing; the logo from 60% (~2.8s, 1.45s long) is in just before the last lines settle,
+        // then the 0.4s hold: the curtain starts at ~5s
+        return { render: render, minLap: 4.5, done: done };
     }
 
-    // ---------- intro: loader -> hero curtain -> hero content (plays once; the loader lasts as long as the critical media takes, min 4s) ----------
+    // ---------- intro: loader -> hero curtain -> hero content (plays once; the loader lasts as long as the critical media takes, v2: curtain at ~5s at the soonest) ----------
     // the loader (v1 or v2, see above) follows the real loading, then the hero opens from the bottom over it
     // and its texts come in
     function intro() {
@@ -313,8 +315,8 @@
 
             // line + % follow the real loading (scripts.js loadProgress), eased so they glide instead of jumping;
             // never faster than one lap in MIN_LAP s, so with everything cached it still reads as a sweep
-            var MIN_LOADER = 4; // s, the loader never closes sooner, even when everything is cached
-            var MIN_LAP = Math.max(MIN_LOADER, view.minLap); // or longer if the version asks (v1: its text, v2: 5s)
+            var MIN_LOADER = 3; // s, the loader never closes sooner, even when everything is cached
+            var MIN_LAP = Math.max(MIN_LOADER, view.minLap); // or longer if the version asks (v1: its text, ~4.3-5.6s)
             var t0 = performance.now();
             var resolveLoaded;
             var loaded = new Promise(function (r) { resolveLoaded = r; });
@@ -343,8 +345,27 @@
             : (window.criticalReady || Promise.resolve());
 
         function addHero() {
-            // slow, soft curtain (1.6s) so the loader doesn't fly away
-            tl.fromTo(hero, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'power2.inOut' }, 'reveal');
+            // slow, soft curtain (1.6s) so the loader doesn't fly away.
+            // The hero is painted under the loader from the start and the loader is cut away from the bottom up,
+            // so the hero photo counts for LCP as soon as it has loaded, not when the curtain opens. The cut follows
+            // the exact line the hero's top edge used to (it opened as clip-path inset(100%) -> 0 over its own
+            // height, which on desktop is taller than the loader), so it looks the same as before
+            // (that version: variants/original loader)
+            if (loader) {
+                var loaderH = loader.offsetHeight;
+                var heroH = hero.offsetHeight;
+                var edge = { p: 1 }; // the curtain line, as a share of the hero height from its top
+                tl.fromTo(edge, { p: 1 }, {
+                    p: 0,
+                    duration: 1.6,
+                    ease: 'power2.inOut',
+                    onUpdate: function () {
+                        loader.style.clipPath = 'inset(0 0 ' + Math.max(0, loaderH - edge.p * heroH) + 'px 0)';
+                    }
+                }, 'reveal');
+            } else {
+                tl.fromTo(hero, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'power2.inOut' }, 'reveal');
+            }
             if (media) tl.fromTo(media, { yPercent: 25, scale: 1.1 }, { yPercent: 0, scale: 1, duration: 1.6, ease: 'power2.inOut' }, 'reveal');
 
             if (title) {

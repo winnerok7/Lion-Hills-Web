@@ -161,7 +161,7 @@ var loaderDone = new Promise(function (resolve) {
     // not before the critical set: on desktop the "Концепція" gallery is already within a screen at the top,
     // and its other videos (~28MB) would take the bandwidth from the loader
     Promise.all([window.criticalReady, loaderDone]).then(function () {
-        // a carousel is watched by its track: .lots .carousel is display: contents on mobile, no box to observe
+        // a carousel is watched by its track (the row that actually comes into view)
         roots.forEach(function (root) { near.observe(root.querySelector('.carousel_track') || root); });
     });
 })();
@@ -337,7 +337,9 @@ document.querySelectorAll('.stories').forEach(function (root) {
         });
         void root.offsetWidth; // restart the fill animation
         segs[current].classList.add('active');
+        // no "back" on the first slide, no "next" on the last one (mobile: the tap zone goes with it)
         prev.hidden = current === 0;
+        next.hidden = current === slides.length - 1;
         // only the visible slide's video plays
         slides.forEach(function (el, i) {
             var v = el.querySelector('video');
@@ -633,12 +635,33 @@ document.querySelectorAll('.faq_list').forEach(function (list) {
     });
 });
 
-// Footer form: no backend yet, so just acknowledge the request
+// Footer form: just a phone number, sent through Web3Forms (sendForm below); "Дякуємо!" until the visitor types again
 document.querySelectorAll('.footer_form').forEach(function (form) {
+    var input = form.elements.phone;
+    var btn = form.querySelector('.footer_submit');
+    var label = btn.textContent;
+
+    input.addEventListener('input', function () {
+        input.setCustomValidity('');
+        if (!btn.disabled) btn.textContent = label;
+    });
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
-        form.querySelector('.footer_submit').textContent = 'Дякуємо!';
-        form.reset();
+        if (btn.disabled) return; // already on its way
+        var digits = input.value.replace(/\D/g, '');
+        if (digits.length < 9 || digits.length > 15) {
+            input.setCustomValidity('Вкажіть номер телефону повністю');
+            input.reportValidity();
+            return;
+        }
+        withSending(btn, sendForm(form, 'Нова заявка з сайту Lion Hills (футер)', {
+            'Форма': 'Футер',
+            'Телефон': input.value.trim()
+        })).then(function () {
+            form.reset();
+            btn.textContent = 'Дякуємо!';
+        }, function () {});
     });
 });
 
@@ -672,9 +695,47 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
     });
 })();
 
+// ---------- Web3Forms ----------
+// Both forms (popup + footer) send here; the access key is public by design (Web3Forms checks the domain).
+// Field names are what the manager reads in the email, so they're in Ukrainian
+var WEB3FORMS_KEY = '29418635-8536-417c-b5a5-40390421bba5';
+
+function sendForm(form, subject, fields) {
+    var data = new FormData();
+    data.append('access_key', WEB3FORMS_KEY);
+    data.append('subject', subject);
+    data.append('from_name', 'Сайт Lion Hills');
+    // honeypot: a hidden box only a bot would tick, Web3Forms drops the request then
+    if (form.elements.botcheck && form.elements.botcheck.checked) data.append('botcheck', 'on');
+    Object.keys(fields).forEach(function (key) { data.append(key, fields[key]); });
+    return fetch('https://api.web3forms.com/submit', { method: 'POST', body: data }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (json) {
+            if (!res.ok || json.success === false) throw new Error(json.message || 'HTTP ' + res.status);
+            return json;
+        });
+    });
+}
+
+// the button says "sending" while the request is out (and can't be pressed twice);
+// on failure it says so for a moment, then gets its label back
+function withSending(btn, request) {
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Надсилаємо…';
+    return request.then(function (result) {
+        btn.disabled = false;
+        btn.textContent = label;
+        return result;
+    }, function (err) {
+        btn.textContent = 'Помилка, спробуйте ще';
+        setTimeout(function () { btn.disabled = false; btn.textContent = label; }, 2500);
+        throw err;
+    });
+}
+
 // Request popup (quiz): pops up once the "Готовність комплексу 2027" block is on screen.
 // Steps: property type -> way to contact (nothing picked up front, "next" waits for a choice) -> name + phone, then a thank-you.
-// Once per visit (sessionStorage), never again after a sent request (localStorage). No backend yet
+// Once per visit (sessionStorage), never again after a sent request (localStorage). Sent through Web3Forms (sendForm)
 (function () {
     var quiz = document.querySelector('.quiz');
     var trigger = document.querySelector('[data-quiz-trigger] .ready_box');
@@ -874,9 +935,19 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
         if (digits().length < country.min || digits().length > country.max) bad.push(phone);
         bad.forEach(function (el) { el.classList.add('is-error'); });
         if (bad.length) { bad[0].focus(); return; }
-        try { localStorage.setItem(SENT, '1'); } catch (e) {}
-        show(3);
-        setTimeout(function () { setOpen(false); }, 3500);
+        if (submit.disabled) return; // already on its way
+        withSending(submit, sendForm(form, 'Нова заявка з сайту Lion Hills (попап)', {
+            'Форма': 'Попап «Запис на перегляд»',
+            'Тип нерухомості': form.querySelector('[name="type"]:checked').value,
+            'Спосіб зв’язку': form.querySelector('[name="contact"]:checked').value,
+            'Ім’я': name.value.trim(),
+            'Телефон': country.code + ' ' + phone.value,
+            'Країна': country.name
+        })).then(function () {
+            try { localStorage.setItem(SENT, '1'); } catch (e) {}
+            show(3);
+            setTimeout(function () { setOpen(false); }, 3500);
+        }, function () {}); // the button shows the failure, the data stays in the fields for another try
     });
 
     quiz.querySelector('.quiz_close').addEventListener('click', function () { setOpen(false); });
