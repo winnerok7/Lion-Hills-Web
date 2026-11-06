@@ -656,8 +656,8 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
             return;
         }
         withSending(btn, sendForm(form, 'Нова заявка з сайту Lion Hills (футер)', {
-            'Форма': 'Футер',
-            'Телефон': input.value.trim()
+            'Form': 'Футер',
+            'Phone': input.value.trim()
         })).then(function () {
             form.reset();
             btn.textContent = 'Дякуємо!';
@@ -697,7 +697,7 @@ document.querySelectorAll('.footer_form').forEach(function (form) {
 
 // ---------- Web3Forms ----------
 // Both forms (popup + footer) send here; the access key is public by design (Web3Forms checks the domain).
-// Field names are what the manager reads in the email, so they're in Ukrainian
+// Field names are in English: Web3Forms garbles Cyrillic keys in the email (values are fine)
 var WEB3FORMS_KEY = '29418635-8536-417c-b5a5-40390421bba5';
 
 function sendForm(form, subject, fields) {
@@ -937,12 +937,12 @@ function withSending(btn, request) {
         if (bad.length) { bad[0].focus(); return; }
         if (submit.disabled) return; // already on its way
         withSending(submit, sendForm(form, 'Нова заявка з сайту Lion Hills (попап)', {
-            'Форма': 'Попап «Запис на перегляд»',
-            'Тип нерухомості': form.querySelector('[name="type"]:checked').value,
-            'Спосіб зв’язку': form.querySelector('[name="contact"]:checked').value,
-            'Ім’я': name.value.trim(),
-            'Телефон': country.code + ' ' + phone.value,
-            'Країна': country.name
+            'Form': 'Попап «Запис на перегляд»',
+            'Property type': form.querySelector('[name="type"]:checked').value,
+            'Contact method': form.querySelector('[name="contact"]:checked').value,
+            'Name': name.value.trim(),
+            'Phone': country.code + ' ' + phone.value,
+            'Country': country.name
         })).then(function () {
             try { localStorage.setItem(SENT, '1'); } catch (e) {}
             show(3);
