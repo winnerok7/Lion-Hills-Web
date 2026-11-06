@@ -1123,11 +1123,13 @@ body {
     border-radius: 27px;
 }
 
-/* desktop: the whole pill (and its open menu) 10% smaller. Scaled from its left edge, which the
-   translate(-50%) puts on the screen centre, so it stays centred; the top stays at 32px */
+/* desktop: the whole pill (and its open menu) 10% smaller, and on screens under 1680px a bit smaller
+   still: --menu-k (scripts.js) = width / 1680, between 0.85 and 1. Scaled from its left edge, which the
+   translate(-50%) puts on the screen centre, so it stays centred; the top stays at 32px.
+   The drawer shrinks the same way (see below it) */
 @media (min-width: 768px) {
     .sticky_header {
-        scale: 0.9;
+        scale: calc(0.9 * var(--menu-k, 1));
         transform-origin: 0 0;
     }
 }
@@ -1441,6 +1443,16 @@ body {
     transition: clip-path 0.8s var(--drawer-ease), transform 0.8s var(--drawer-ease), visibility 0s;
 }
 
+/* desktop: shrinks with the pill under 1680px (--menu-k), from its top right corner; the height cap
+   is in unscaled px, so it still ends 12px above the screen bottom */
+@media (min-width: 768px) {
+    .drawer {
+        scale: var(--menu-k, 1);
+        transform-origin: 100% 0;
+        max-height: calc((100vh - 24px) / var(--menu-k, 1));
+    }
+}
+
 .drawer_handle {
     position: absolute;
     top: 0;
@@ -1699,7 +1711,7 @@ a.drawer_card {
 /* villa floorplan download: under the pill while a villa banner is on screen */
 .plan_download {
     position: fixed;
-    top: 99px; /* 8px under the pill (32px + 66px scaled to 0.9) */
+    top: calc(40px + 59.4px * var(--menu-k, 1)); /* 8px under the pill (32px + 66px scaled to 0.9 × --menu-k) */
     left: 50%;
     z-index: 50;
     display: flex;

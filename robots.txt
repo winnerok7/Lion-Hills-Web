@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /variants/
+
+Sitemap: https://lionhills.kiev.ua/sitemap.xml

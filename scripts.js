@@ -11,6 +11,17 @@
 var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
 var isMobile = window.matchMedia('(max-width: 767px)').matches;
 
+// Desktop menus (pill + drawer): full size from 1680px wide, proportionally smaller below, never under 85%.
+// style.css uses --menu-k only above the mobile breakpoint, so phones keep their own sizes
+(function () {
+    function fit() {
+        var k = Math.max(0.85, Math.min(1, window.innerWidth / 1680));
+        document.documentElement.style.setProperty('--menu-k', k.toFixed(3));
+    }
+    fit();
+    window.addEventListener('resize', fit);
+})();
+
 // data-media="desktop" / "mobile": a slide whose media differs in kind between devices (photo vs video);
 // the other device's element is dropped before anything loads or plays
 document.querySelectorAll(isMobile ? '[data-media="desktop"]' : '[data-media="mobile"]').forEach(function (el) {
