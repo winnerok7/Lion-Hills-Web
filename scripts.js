@@ -1,15 +1,26 @@
 // ---------- Media loading ----------
 // Everything below the hero has data-src instead of src (data-src-mobile, if set, wins on mobile; data-media drops an element on the other device). Order:
-// 1) critical, loaded while the loader runs (its line/% show the real progress):
-//    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero)
-// 2) queue: [data-load="queue"] one by one in page order (first slide of the other sliders, build2)
+// 1) critical, the loader waits for it (its drawing runs on a fixed time, then "завантаження…" if this isn't in yet):
+//    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero);
+//    a critical video with a poster only needs the poster (the video opens the queue), without one its first frame.
+//    Every video has data-poster (+ data-poster-mobile): its first frame as WebP, set together with the src
+// 2) queue: [data-load="queue"] in page order, QUEUE_SLOTS files at a time (first slide of the other sliders, build1/2)
 // 3) the rest: gallery/carousel slides once their block is about a screen away; stories load current + next slide
 // On mobile data-load-mobile overrides data-load: the critical videos go to the queue (iOS doesn't buffer
 // videos that aren't playing, so the loader would hang on them), critical is fonts + hero photo + the villa
-// covers (fast scrolling showed black banners while they loaded), and the rest waits for the loader to end
+// covers (fast scrolling showed black banners while they loaded), and the rest waits for the loader to end.
+// Save-data / 2g: critical is only the fonts and the hero photo, everything else goes to the queue
 
-var CRITICAL_MAX = 15000; // ms, on a slow connection the loader gives up waiting after this
+var CRITICAL_MAX = 9000; // ms, on a slow connection the loader gives up waiting after this and shows the page
+var QUEUE_SLOTS = 3;     // queue files loading at once
 var isMobile = window.matchMedia('(max-width: 767px)').matches;
+// touch devices (phones, iPads, also iPadOS in desktop mode that says "MacIntel"): iOS/iPadOS Safari doesn't
+// buffer a video that isn't playing, so for those only the metadata is waited for. isMobile stays the layout
+// switch (phone files via data-src-mobile), an iPad still gets the desktop files
+var isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+var conn = navigator.connection;
+var isSlowNet = !!(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')));
 
 // Desktop menus (pill + drawer): full size from 1680px wide, proportionally smaller below, never under 85%.
 // style.css uses --menu-k only above the mobile breakpoint, so phones keep their own sizes
@@ -40,12 +51,34 @@ function goTo(target) {
     }
 }
 
-// [data-load] elements of one group, in page order
-function loadGroup(name) {
+// [data-load] elements of the given group(s), in page order; on a slow connection critical counts as queue
+function loadGroup(names) {
     return Array.prototype.filter.call(document.querySelectorAll('[data-load]'), function (el) {
         var group = isMobile && el.getAttribute('data-load-mobile') || el.getAttribute('data-load');
-        return group === name;
+        if (isSlowNet && group === 'critical') group = 'queue';
+        return names.indexOf(group) >= 0;
     });
+}
+
+// load a list in order, `slots` files at a time; each slot moves on once its file is usable (or after 10s)
+function loadInTurn(list, slots) {
+    var i = 0;
+    function next() {
+        var el = list[i++];
+        if (!el) return;
+        if (el.tagName === 'VIDEO') el.preload = 'auto';
+        loadMedia(el); // no-op if a block already pulled it in
+        whenLoaded(el).then(next);
+    }
+    for (var k = 0; k < slots; k++) next();
+}
+
+// a video's first frame as a still (data-poster / data-poster-mobile, WebP): shown until the video has frames,
+// so a slow video is never a black or white box. Returns the poster url, if any
+function setPoster(el) {
+    var url = isMobile && el.getAttribute('data-poster-mobile') || el.getAttribute('data-poster');
+    if (url && !el.hasAttribute('poster')) el.poster = url;
+    return url;
 }
 
 // data-src-mobile: a separate (vertical / lighter) file for phones
@@ -53,6 +86,7 @@ function loadMedia(el) {
     var src = el && el.getAttribute('data-src');
     if (!src) return;
     if (isMobile && el.hasAttribute('data-src-mobile')) src = el.getAttribute('data-src-mobile');
+    if (el.tagName === 'VIDEO') setPoster(el); // before the src, so the still is what shows while it loads
     el.removeAttribute('data-src');
     el.src = src;
     // decode right away (off the main thread), not on the first paint mid-scroll / mid-animation
@@ -71,19 +105,23 @@ function whenLoaded(el, max) {
         var t = setTimeout(resolve, max || 10000);
         function done() { clearTimeout(t); resolve(); }
         el.addEventListener('error', done, { once: true });
-        if (el.tagName === 'VIDEO' && isMobile) {
+        if (el.tagName === 'VIDEO' && isTouch) {
             // iOS doesn't buffer a video that isn't playing, so canplaythrough may never come: metadata is enough
             if (el.readyState >= 1) return done();
             el.addEventListener('loadedmetadata', done, { once: true });
         } else if (el.tagName === 'VIDEO') {
-            if (el.readyState >= 4) return done();
-            el.addEventListener('canplaythrough', done, { once: true });
+            // the first frame is enough: with preload="auto" the rest keeps coming in on its own
+            if (el.readyState >= 2) return done();
+            el.addEventListener('loadeddata', done, { once: true });
         } else {
             if (el.complete && el.naturalWidth) return done();
             el.addEventListener('load', done, { once: true });
         }
     });
 }
+
+// critical videos whose poster stood in for them during the loader; they open the queue
+var criticalVideos = [];
 
 // critical set: window.criticalReady (promise) + window.loadProgress() (0..1) for the loader;
 // animations.js holds the hero curtain on criticalReady too
@@ -108,9 +146,22 @@ function whenLoaded(el, max) {
         waits.push(track(img.decode ? img.decode().catch(function () {}) : null));
     }
 
-    // all at once, in parallel with the hero; a video counts by how much of it is buffered;
-    // images are decoded up front too, so big ones (villa covers) don't stutter when scrolled to
-    loadGroup('critical').forEach(function (el) {
+    // all at once, in parallel with the hero; images are decoded up front too, so big ones (villa covers)
+    // don't stutter when scrolled to. A critical video only needs its poster here: the video file itself
+    // goes first in the queue, right after the loader
+    loadGroup(['critical']).forEach(function (el) {
+        if (el.tagName === 'VIDEO' && el.hasAttribute('data-poster')) {
+            var still = new Image();
+            still.src = setPoster(el);
+            waits.push(track(new Promise(function (resolve) {
+                var t = setTimeout(resolve, CRITICAL_MAX);
+                function ok() { clearTimeout(t); resolve(); }
+                if (still.decode) still.decode().then(ok, ok);
+                else { still.onload = ok; still.onerror = ok; }
+            })));
+            criticalVideos.push(el);
+            return;
+        }
         if (el.tagName === 'VIDEO') el.preload = 'auto';
         loadMedia(el);
         var usable = whenLoaded(el, CRITICAL_MAX).then(function () {
@@ -145,14 +196,7 @@ var loaderDone = new Promise(function (resolve) {
 
 (function () {
     Promise.all([window.criticalReady, loaderDone]).then(function () {
-        var queue = loadGroup('queue');
-        (function next() {
-            var el = queue.shift();
-            if (!el) return;
-            if (el.tagName === 'VIDEO') el.preload = 'auto';
-            loadMedia(el); // no-op if a block already pulled it in
-            whenLoaded(el).then(next);
-        })();
+        loadInTurn(criticalVideos.concat(loadGroup(['queue'])), QUEUE_SLOTS);
     });
 
     // the rest: whole gallery / carousel at once, standalone media by itself (stories handle their own)
@@ -234,6 +278,7 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
         captions.forEach(function (el, i) { el.classList.toggle('active', i === index); });
         loadMediaIn(items[index]); // a tab clicked before the block got near
         if (tabs[index]) centerTab(tabs[index]);
+        primeNext();
 
         // no "next" on the last slide (the tabs still go anywhere)
         isLast = nextIndex() === null;
@@ -262,6 +307,19 @@ document.querySelectorAll(".gallery").forEach(function (gallery) {
     function goNext() {
         var i = nextIndex();
         if (i !== null) show(i);
+    }
+
+    // the slide after the current one buffers in full ahead of time (the markup's preload="metadata" would leave
+    // it empty until clicked); not before the critical set, the first gallery is near the top on desktop
+    function primeNext() {
+        var at = current;
+        window.criticalReady.then(function () {
+            if (at !== current) return;
+            var i = nextIndex();
+            if (i === null) return;
+            items[i].querySelectorAll('video').forEach(function (v) { v.preload = 'auto'; });
+            loadMediaIn(items[i]);
+        });
     }
 
     next.addEventListener('click', goNext);
@@ -410,14 +468,7 @@ document.querySelectorAll('.plan_floors').forEach(function (box) {
         started = true;
         obs.disconnect();
         window.criticalReady.then(function () {
-            var queue = Array.prototype.slice.call(document.querySelectorAll('.types .stories [data-src]'));
-            (function next() {
-                var el = queue.shift();
-                if (!el) return;
-                if (el.tagName === 'VIDEO') el.preload = 'auto';
-                loadMedia(el); // no-op if the slider already pulled it in
-                whenLoaded(el).then(next);
-            })();
+            loadInTurn(Array.prototype.slice.call(document.querySelectorAll('.types .stories [data-src]')), 1);
         });
     }, { rootMargin: '100% 0px' });
     obs.observe(first);

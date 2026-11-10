@@ -1,6 +1,9 @@
 (function () {
     var root = document.documentElement;
     var isMobile = window.matchMedia('(max-width: 767px)').matches;
+    // phones, iPads (also iPadOS in desktop mode, "MacIntel" + touch); same test as in scripts.js
+    var isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     // loader v2 (#loader-v2) everywhere; v1 (#loader) stays in the markup and code to switch back, dropped right away
     var LOADER = 'v2';
     var loader = document.getElementById(LOADER === 'v2' ? 'loader-v2' : 'loader');
@@ -205,16 +208,18 @@
         }
 
         // logo out of blur, the phrase a moment later; started from render(), awaited by done().
-        // Mobile: no animated blur (choppy in iOS Safari and snaps sharp at the end), a short rise instead
+        // Phones and touch devices (iPads take the desktop layout): no animated blur, a short rise instead:
+        // choppy in iOS Safari, snaps sharp at the end, and on iPad the filter layer is the likely source of
+        // a coloured strip behind the logo. Desktop: the filter is dropped once sharp (no leftover filter layer)
         var brandIn = gsap.timeline({ paused: true });
-        if (isMobile) {
+        if (isMobile || isTouch) {
             brandIn.fromTo(logo, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1.1, ease: 'sine.out' })
                 .fromTo(phrase, { opacity: 0, y: 8 }, { opacity: 0.75, y: 0, duration: 1, ease: 'sine.out' }, 0.45);
         } else {
             brandIn.fromTo(logo, { opacity: 0, filter: 'blur(8px)' },
-                    { opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'sine.out' })
+                    { opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'sine.out', clearProps: 'filter' })
                 .fromTo(phrase, { opacity: 0, filter: 'blur(6px)' },
-                    { opacity: 0.75, filter: 'blur(0px)', duration: 1, ease: 'sine.out' }, 0.45);
+                    { opacity: 0.75, filter: 'blur(0px)', duration: 1, ease: 'sine.out', clearProps: 'filter' }, 0.45);
         }
 
         var lines = all('line', svg).map(function (line, i) {
@@ -313,25 +318,20 @@
             var view = (loader.id === 'loader-v2' ? loaderV2 : loaderV1)(tl, counter);
             view.render();
 
-            // line + % follow the real loading (scripts.js loadProgress), eased so they glide instead of jumping;
-            // never faster than one lap in MIN_LAP s, so with everything cached it still reads as a sweep
+            // the drawing runs on a fixed time, the same on any connection; the loading is waited for after it
+            // (waitCritical below: "завантаження…" if it's still going)
             var MIN_LOADER = 3; // s, the loader never closes sooner, even when everything is cached
-            var MIN_LAP = Math.max(MIN_LOADER, view.minLap); // or longer if the version asks (v1: its text, ~4.3-5.6s)
+            var DRAW_DURATION = Math.max(MIN_LOADER, view.minLap); // v2: 4.5s; v1: its text, ~4.3-5.6s
             var t0 = performance.now();
-            var resolveLoaded;
-            var loaded = new Promise(function (r) { resolveLoaded = r; });
+            var resolveDrawn;
+            var drawn = new Promise(function (r) { resolveDrawn = r; });
             var tick = function () {
-                var real = window.loadProgress ? window.loadProgress() : 1;
-                // the time cap eases in and out but stays close to an even pace (half linear, half smoothstep):
+                // eases in and out but stays close to an even pace (half linear, half smoothstep):
                 // gentle start and finish without a fast middle
-                var lap = Math.min(1, (performance.now() - t0) / 1000 / MIN_LAP);
-                lap = 0.5 * lap + 0.5 * lap * lap * (3 - 2 * lap);
-                var target = Math.min(real, lap) * 100;
-                // frame-rate independent smoothing (same feel at 60 and 120 Hz)
-                counter.v += (target - counter.v) * (1 - Math.pow(0.9, gsap.ticker.deltaRatio()));
-                if (target >= 100 && counter.v > 99.6) counter.v = 100;
+                var lap = Math.min(1, (performance.now() - t0) / 1000 / DRAW_DURATION);
+                counter.v = (0.5 * lap + 0.5 * lap * lap * (3 - 2 * lap)) * 100;
                 view.render();
-                if (counter.v === 100) { gsap.ticker.remove(tick); resolveLoaded(); }
+                if (lap === 1) { gsap.ticker.remove(tick); resolveDrawn(); }
             };
             gsap.ticker.add(tick);
         } else {
@@ -340,9 +340,25 @@
 
         // the curtain needs the critical media (scripts.js criticalReady); with the loader also the drawing at 100%
         // and the version's own finish (v1: short hold, v2: logo)
+        var critical = window.criticalReady || Promise.resolve();
         var ready = loader
-            ? loaded.then(view.done)
-            : (window.criticalReady || Promise.resolve());
+            ? drawn.then(view.done).then(waitCritical)
+            : critical;
+
+        // drawing over: go on at once if the critical media are in; otherwise, after a short grace (so it doesn't
+        // flash when they're nearly there), "завантаження…" blinks under the phrase until they are, then fades (0.3s)
+        function waitCritical() {
+            return new Promise(function (resolve) {
+                var shown = false;
+                var timer = setTimeout(function () { shown = true; loader.classList.add('is-waiting'); }, 300);
+                critical.then(function () {
+                    clearTimeout(timer);
+                    if (!shown) return resolve();
+                    loader.classList.remove('is-waiting');
+                    setTimeout(resolve, 300);
+                });
+            });
+        }
 
         function addHero() {
             // slow, soft curtain (1.6s) so the loader doesn't fly away.
