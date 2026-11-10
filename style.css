@@ -54,7 +54,7 @@ body {
 .hero_media {
     position: absolute;
     inset: 0;
-    background: url('media/hero2_compressed.jpg') center / cover no-repeat;
+    background: url('media/hero2_compressed.webp') center / cover no-repeat;
     will-change: transform;
 }
 
@@ -3128,7 +3128,7 @@ html:not(.js-anim) .loader {
     }
 
     .hero_media {
-        background-image: url('media/vert hero mob new 2.jpg');
+        background-image: url('media/vert hero mob new 2.webp');
     }
 
     /* photo parallax over the hero's own height, run by the browser in step with the scroll

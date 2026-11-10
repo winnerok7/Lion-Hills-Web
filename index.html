@@ -89,8 +89,8 @@
     <!-- critical for the loader: its text font, % counter font and the hero photo; all other media goes through scripts.js -->
     <link rel="preload" href="fonts/AeonikPro-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/AeonikPro-Medium.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="media/hero2_compressed.jpg" as="image" fetchpriority="high" media="(min-width: 768px)">
-    <link rel="preload" href="media/vert hero mob new 2.jpg" as="image" fetchpriority="high" media="(max-width: 767px)">
+    <link rel="preload" href="media/hero2_compressed.webp" as="image" type="image/webp" fetchpriority="high" media="(min-width: 768px)">
+    <link rel="preload" href="media/vert hero mob new 2.webp" as="image" type="image/webp" fetchpriority="high" media="(max-width: 767px)">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="style.css">
@@ -330,7 +330,7 @@
             <h2 class="architecture_text" data-anim="scrub">Архітектура навколо природи Лісників. Обмежена кількість вілл та пентхаусів, терасна забудова і інтеграція в природний ландшафт формують середовище, у якому архітектура не домінує над природою, а стає її продовженням.</h2>
 
             <div class="architecture_video">
-                <video data-load="critical" data-src="media/Bird_Update.mp4" data-src-mobile="media/Bird_mob.mp4" autoplay muted loop playsinline data-anim="fade"></video>
+                <video data-load="critical" data-src="media/Bird_Update.mp4" data-src-mobile="media/Bird_mob.mp4" autoplay muted loop playsinline data-anim="fade" data-poster="media/Bird_Update.poster.webp" data-poster-mobile="media/Bird_mob.poster.webp"></video>
                 <p class="architecture_caption" data-anim="fade">Розташований на видових пагорбах в Лісниках</p>
             </div>
         </div>
@@ -343,16 +343,16 @@
             <div class="gallery" data-anim="fade" id="benefits-gallery">
                 <div class="gallery_stage">
                     <div class="gallery_item active" data-index="0">
-                        <video data-load="critical" data-load-mobile="queue" data-src="media/LH media/Переваги/Compressed/Location.webm" muted loop playsinline preload="metadata"></video>
+                        <video data-load="critical" data-load-mobile="queue" data-src="media/LH media/Переваги/Compressed/Location.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Переваги/Compressed/Location.poster.webp"></video>
                     </div>
                     <div class="gallery_item" data-index="1">
-                        <video data-src="media/LH media/Переваги/Compressed/Kraevid.webm" muted loop playsinline preload="metadata"></video>
+                        <video data-src="media/LH media/Переваги/Compressed/Kraevid.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Переваги/Compressed/Kraevid.poster.webp"></video>
                     </div>
                     <div class="gallery_item" data-index="2">
-                        <video data-src="media/LH media/Переваги/Compressed/Privacy.mp4" muted loop playsinline preload="metadata"></video>
+                        <video data-src="media/LH media/Переваги/Compressed/Privacy.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Переваги/Compressed/Privacy.poster.webp"></video>
                     </div>
                     <div class="gallery_item" data-index="3">
-                        <video data-src="media/LH media/Переваги/Compressed/infrastructure new.mp4" muted loop playsinline preload="metadata"></video>
+                        <video data-src="media/LH media/Переваги/Compressed/infrastructure new.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Переваги/Compressed/infrastructure new.poster.webp"></video>
                     </div>
                     <button class="gallery_next" aria-label="Наступний слайд"></button>
                 </div>
@@ -386,22 +386,22 @@
             <div class="carousel" id="clubhouse-carousel">
                 <div class="carousel_track" data-anim="stagger">
                     <article class="carousel_card">
-                        <img decoding="async" data-load="critical" data-load-mobile="queue" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_Sauna_WView_Vertical.jpg" alt="Сауна з панорамним вікном на ліс у SPA-комплексі Lion Hills">
+                        <img decoding="async" data-load="critical" data-load-mobile="queue" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_Sauna_WView_Vertical.webp" alt="Сауна з панорамним вікном на ліс у SPA-комплексі Lion Hills">
                         <h3>SPA комплекс</h3>
                         <p>Концепція сауни з панорамним вікном на ліс. П'ятниця, тиша і нікуди не потрібно їхати.</p>
                     </article>
                     <article class="carousel_card">
-                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_GymPavillion.jpg" alt="Спортивна зала з панорамним вікном на пагорби в Lion Hills">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_GymPavillion.webp" alt="Спортивна зала з панорамним вікном на пагорби в Lion Hills">
                         <h3>Gym</h3>
                         <p>Спортивна зала з панорамним вікном на пагорби і ранковий туман.</p>
                     </article>
                     <article class="carousel_card">
-                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_FitnessYogaPavillion.jpg" alt="Простір для йоги над лісом у клабхаусі Lion Hills">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/LH_FitnessYogaPavillion.webp" alt="Простір для йоги над лісом у клабхаусі Lion Hills">
                         <h3>Yoga space</h3>
                         <p>Тихий простір над лісом, де ранок починається з практики.</p>
                     </article>
                     <article class="carousel_card">
-                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/girl-back-infinity-pool.jpg" alt="Infinity pool з видом на Голосіївський ліс у Lion Hills">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/girl-back-infinity-pool.webp" alt="Infinity pool з видом на Голосіївський ліс у Lion Hills">
                         <h3>Infinity pool</h3>
                         <p>Басейн із краєвидом на Голосіївський заповідник на світанку.</p>
                     </article>
@@ -411,7 +411,7 @@
                         <p>Ігри, розваги та час з аніматорами – поруч із домом і під наглядом.</p>
                     </article>
                     <article class="carousel_card">
-                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/restaurant_new.JPG" alt="Ресторан Belkin з панорамним майданчиком у Lion Hills">
+                        <img decoding="async" data-src="media/LH media/Внутрішня інфр/Compressed/Webp 2/restaurant_new.webp" alt="Ресторан Belkin з панорамним майданчиком у Lion Hills">
                         <h3>Ресторан Belkin</h3>
                         <p>Ресторан із панорамним майданчиком. Сусід, який вже відомий у Києві.</p>
                     </article>
@@ -434,16 +434,16 @@
                 <div class="gallery gallery_villas" data-anim="fade" id="villas-gallery">
                     <div class="gallery_stage">
                         <div class="gallery_item active" data-index="0">
-                            <video data-load="queue" data-src="media/LH media/Villas/Compressed/terrace.webm" data-src-mobile="media/LH media/Villas/Mobile/terrace_nobalcon.mp4" muted loop playsinline preload="metadata"></video>
+                            <video data-load="queue" data-src="media/LH media/Villas/Compressed/terrace.mp4" data-src-mobile="media/LH media/Villas/Mobile/terrace_nobalcon.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Villas/Compressed/terrace.poster.webp" data-poster-mobile="media/LH media/Villas/Mobile/terrace_nobalcon.poster.webp"></video>
                         </div>
                         <div class="gallery_item" data-index="1">
-                            <video data-src="media/LH media/Villas/Compressed/privacy.webm" data-src-mobile="media/LH media/Villas/Mobile/Privacy_mob.mp4" muted loop playsinline preload="metadata"></video>
+                            <video data-src="media/LH media/Villas/Compressed/privacy.mp4" data-src-mobile="media/LH media/Villas/Mobile/Privacy_mob.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Villas/Compressed/privacy.poster.webp" data-poster-mobile="media/LH media/Villas/Mobile/Privacy_mob.poster.webp"></video>
                         </div>
                         <div class="gallery_item" data-index="2">
-                            <video data-src="media/LH media/Villas/Compressed/windows.webm" data-src-mobile="media/LH media/Villas/Mobile/windows_mob.mp4" muted loop playsinline preload="metadata"></video>
+                            <video data-src="media/LH media/Villas/Compressed/windows.mp4" data-src-mobile="media/LH media/Villas/Mobile/windows_mob.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Villas/Compressed/windows.poster.webp" data-poster-mobile="media/LH media/Villas/Mobile/windows_mob.poster.webp"></video>
                         </div>
                         <div class="gallery_item" data-index="3">
-                            <video data-src="media/LH media/Villas/Compressed/parking.webm" data-src-mobile="media/LH media/Villas/Mobile/Parking_mob.mp4" muted loop playsinline preload="metadata"></video>
+                            <video data-src="media/LH media/Villas/Compressed/parking.mp4" data-src-mobile="media/LH media/Villas/Mobile/Parking_mob.mp4" muted loop playsinline preload="metadata" data-poster="media/LH media/Villas/Compressed/parking.poster.webp" data-poster-mobile="media/LH media/Villas/Mobile/Parking_mob.poster.webp"></video>
                         </div>
                         <button class="gallery_next" aria-label="Наступний слайд"></button>
                     </div>
@@ -466,7 +466,7 @@
 
             <div class="ready">
                 <div class="ready_box" data-anim="fade-only">
-                    <video data-load="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build1.mp4" data-src-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build Ready.mp4" autoplay muted loop playsinline></video>
+                    <video data-load="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build1.mp4" data-src-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build Ready.mp4" autoplay muted loop playsinline data-poster="media/LH media/Готові юніти/Desktop/Compressed/build1.poster.webp" data-poster-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build Ready.poster.webp"></video>
                     <div class="ready_head">
                         <h2 class="ready_title">Готові окремі вілли та пентхауси</h2>
                         <p class="ready_label">Повна готовність – 2027 рік, можна починати ремонт</p>
@@ -481,7 +481,7 @@
 
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/villa1.webp" data-src-mobile="media/Mobile Villas/Villa 1/villa1_nobalcon compressed.jpg" alt="Вілла 251 м² у Lion Hills, Лісники" style="object-position: center bottom">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/villa1.webp" data-src-mobile="media/Mobile Villas/Villa 1/villa1_nobalcon compressed.webp" alt="Вілла 251 м² у Lion Hills, Лісники" style="object-position: center bottom">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 251м<sup>2</sup></h3>
                             <p class="stories_sub">Архітектура простору</p>
@@ -489,12 +489,12 @@
                     </div>
                     <div class="stories_slide">
                         <div class="stories_plan">
-                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/Villa1.png" alt="Планування вілли 251 м²">
+                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/Villa1.webp" alt="Планування вілли 251 м²">
                             <!-- mobile: one floor at a time, switched by the pills under it (scripts.js) -->
                             <div class="plan_floors" data-media="mobile">
                                 <div class="plan_floors_imgs">
-                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/Villa1 (1).png" alt="Планування вілли 251 м², перший поверх">
-                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/Villa1.png" alt="Планування вілли 251 м², другий поверх">
+                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/Villa1 (1).webp" alt="Планування вілли 251 м², перший поверх">
+                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/Villa1.webp" alt="Планування вілли 251 м², другий поверх">
                                 </div>
                                 <div class="plan_floors_actions">
                                     <div class="plan_floors_tabs">
@@ -513,15 +513,15 @@
                         </div>
                     </div>
                     <div class="stories_slide">
-                        <video class="stories_img" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/Terrace Update.mp4" data-src-mobile="media/Mobile Villas/Villa 1/Terrace.mp4" muted loop playsinline preload="none"></video>
+                        <video class="stories_img" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/Terrace Update.mp4" data-src-mobile="media/Mobile Villas/Villa 1/Terrace.mp4" muted loop playsinline preload="none" data-poster="media/Desktop Villas/Villa1/Desktop/Compressed/Terrace Update.poster.webp" data-poster-mobile="media/Mobile Villas/Villa 1/Terrace.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Терасса</span>Крита тераса площею близько 45 м² стає природним продовженням вітальні та приватного саду. Тут достатньо простору для великого обіднього столу, лаунж-зони та зустрічей із друзями. Завдяки інтеграції в архітектуру будинку терасою можна користуватися до дев'яти місяців на рік.</p>
                     </div>
                     <div class="stories_slide">
-                        <video class="stories_img" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/Rooms Update.mp4" data-src-mobile="media/Mobile Villas/Villa 1/Rooms.mp4" muted loop playsinline preload="none"></video>
+                        <video class="stories_img" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/Rooms Update.mp4" data-src-mobile="media/Mobile Villas/Villa 1/Rooms.mp4" muted loop playsinline preload="none" data-poster="media/Desktop Villas/Villa1/Desktop/Compressed/Rooms Update.poster.webp" data-poster-mobile="media/Mobile Villas/Villa 1/Rooms.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Кімнати</span>До чотирьох спалень, відкритий простір кухні-вітальні та окремі приватні зони дозволяють адаптувати віллу до потреб родини. Великоформатне скління наповнює кімнати природним світлом, а продумане зонування зберігає відчуття простору та приватності.</p>
                     </div>
                     <div class="stories_slide">
-                        <video class="stories_img" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/parking.mp4" data-src-mobile="media/Mobile Villas/Villa 1/Parking.mp4" muted loop playsinline preload="none"></video>
+                        <video class="stories_img" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/parking.mp4" data-src-mobile="media/LH media/Villas/Mobile/Parking_mob.mp4" muted loop playsinline preload="none" data-poster="media/Desktop Villas/Villa1/Desktop/Compressed/parking.poster.webp" data-poster-mobile="media/LH media/Villas/Mobile/Parking_mob.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Гараж</span>Вбудований гараж на два автомобілі є частиною архітектури вілли. Паркування організоване в межах приватної резиденції, поєднуючи щоденну зручність із цілісністю архітектурного рішення. Окремо для кожної вілли доступні 2 відкриті паркомісця.</p>
                     </div>
                     <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
@@ -536,7 +536,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/villa2.webp" data-src-mobile="media/Mobile Villas/Villa 2/IMG_7439.JPG" alt="Вілла 255 м² у Lion Hills, Лісники">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/villa2.webp" data-src-mobile="media/Mobile Villas/Villa 2/IMG_7439.webp" alt="Вілла 255 м² у Lion Hills, Лісники">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 255м<sup>2</sup></h3>
                             <p class="stories_sub">Архітектура світла</p>
@@ -544,12 +544,12 @@
                     </div>
                     <div class="stories_slide">
                         <div class="stories_plan">
-                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa2.png" alt="Планування вілли 255 м²">
+                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa2.webp" alt="Планування вілли 255 м²">
                             <!-- mobile: one floor at a time, switched by the pills under it (scripts.js) -->
                             <div class="plan_floors" data-media="mobile">
                                 <div class="plan_floors_imgs">
-                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa2 (1).png" alt="Планування вілли 255 м², перший поверх">
-                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa2.png" alt="Планування вілли 255 м², другий поверх">
+                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa2 (1).webp" alt="Планування вілли 255 м², перший поверх">
+                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa2.webp" alt="Планування вілли 255 м², другий поверх">
                                 </div>
                                 <div class="plan_floors_actions">
                                     <div class="plan_floors_tabs">
@@ -568,15 +568,15 @@
                         </div>
                     </div>
                     <div class="stories_slide">
-                        <video class="stories_img" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/architrecture.mp4" data-src-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000601_V1-0008.mp4" muted loop playsinline preload="none"></video>
+                        <video class="stories_img" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/architrecture.mp4" data-src-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000601_V1-0008.mp4" muted loop playsinline preload="none" data-poster="media/Desktop Villas/Villa2/Desktop/Compressed/architrecture.poster.webp" data-poster-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000601_V1-0008.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Архітектура</span>Дворівнева вілла площею 255 м² поєднує відкриті спільні простори першого поверху з приватною зоною спалень на другому. Кутова кухня-вітальня, панорамне скління та продумане зонування створюють баланс простору, світла й приватності.</p>
                     </div>
                     <div class="stories_slide">
-                        <video class="stories_img" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/sklo.mp4" data-src-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000301_V1-0006.mp4" muted loop playsinline preload="none"></video>
+                        <video class="stories_img" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/sklo.mp4" data-src-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000301_V1-0006.mp4" muted loop playsinline preload="none" data-poster="media/Desktop Villas/Villa2/Desktop/Compressed/sklo.poster.webp" data-poster-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000301_V1-0006.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Скління</span>Кутове панорамне скління від підлоги до стелі наповнює простору кухню-вітальню природним світлом і відкриває краєвиди на навколишній ландшафт. Тонкі алюмінієві профілі мінімізують візуальні перешкоди, створюючи відчуття єдності інтер’єру та природи.</p>
                     </div>
                     <div class="stories_slide">
-                        <video class="stories_img" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/terrace_001.mp4" data-src-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000701_V1-0007.mp4" muted loop playsinline preload="none"></video>
+                        <video class="stories_img" data-src="media/Desktop Villas/Villa2/Desktop/Compressed/terrace_001.mp4" data-src-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000701_V1-0007.mp4" muted loop playsinline preload="none" data-poster="media/Desktop Villas/Villa2/Desktop/Compressed/terrace_001.poster.webp" data-poster-mobile="media/Mobile Villas/Villa 2/LH_EV_V0000000701_V1-0007.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Крита тераса</span>Крита тераса площею 31 м² продовжує простір вітальні та відкривається до приватного саду. Інтегрована в архітектуру вілли, вона створена для використання до дев’яти місяців на рік — від ранкової кави до сімейних вечер і зустрічей із друзями.</p>
                     </div>
                     <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
@@ -591,7 +591,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa3/Desktop/Compressed/villa3.webp" data-src-mobile="media/Mobile Villas/Villa 3/Villa 3 compressed.jpg" alt="Вілла 255 м² з видом на Лісники в Lion Hills" style="--pos: right center; --pos-mobile: 75% center">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa3/Desktop/Compressed/villa3.webp" data-src-mobile="media/Mobile Villas/Villa 3/Villa 3 compressed.webp" alt="Вілла 255 м² з видом на Лісники в Lion Hills" style="--pos: right center; --pos-mobile: 75% center">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 251м<sup>2</sup></h3>
                             <p class="stories_sub">З видом на Лісники</p>
@@ -599,12 +599,12 @@
                     </div>
                     <div class="stories_slide">
                         <div class="stories_plan">
-                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa3 upd.png" alt="Планування вілли 255 м² з видом на Лісники">
+                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa3 upd.webp" alt="Планування вілли 255 м² з видом на Лісники">
                             <!-- mobile: one floor at a time, switched by the pills under it (scripts.js) -->
                             <div class="plan_floors" data-media="mobile">
                                 <div class="plan_floors_imgs">
-                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa3 -floor1 upd.png" alt="Планування вілли 255 м² з видом на Лісники, перший поверх">
-                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa3 floor 2 upd.png" alt="Планування вілли 255 м² з видом на Лісники, другий поверх">
+                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa3 -floor1 upd.webp" alt="Планування вілли 255 м² з видом на Лісники, перший поверх">
+                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa3 floor 2 upd.webp" alt="Планування вілли 255 м² з видом на Лісники, другий поверх">
                                 </div>
                                 <div class="plan_floors_actions">
                                     <div class="plan_floors_tabs">
@@ -623,12 +623,12 @@
                         </div>
                     </div>
                     <div class="stories_slide">
-                        <img data-media="desktop" decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa3/Desktop/Compressed/terrace.jpg" alt="Крита тераса вілли 255 м² у Lion Hills">
-                        <video class="stories_img" data-media="mobile" data-src="media/Mobile Villas/Villa 3/Terrace Compressed.mp4" muted loop playsinline preload="none"></video>
+                        <img data-media="desktop" decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa3/Desktop/Compressed/terrace.webp" alt="Крита тераса вілли 255 м² у Lion Hills">
+                        <video class="stories_img" data-media="mobile" data-src="media/Mobile Villas/Villa 3/Terrace Compressed.mp4" muted loop playsinline preload="none" data-poster="media/Mobile Villas/Villa 3/Terrace Compressed.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Тераса</span>Крита тераса стає природним продовженням вітальні та приватного саду. Тут достатньо простору для великого обіднього столу, лаунж-зони та зустрічей із друзями. Завдяки інтеграції в архітектуру будинку терасою можна користуватися до дев'яти місяців на рік.</p>
                     </div>
                     <div class="stories_slide">
-                        <img decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa3/Desktop/Compressed/view.jpg" alt="Краєвид на Лісники з панорамних вікон вілли Lion Hills">
+                        <img decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa3/Desktop/Compressed/view.webp" alt="Краєвид на Лісники з панорамних вікон вілли Lion Hills">
                         <p class="stories_text"><span class="stories_mini">Види</span>Панорамне скління та приватні простори відкривають краєвиди на навколишній ландшафт і Лісники. Природний рельєф і зелень поруч створюють відчуття життя серед лісу — у 15 хвилинах від центру Києва.</p>
                     </div>
                     <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
@@ -642,7 +642,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa4/Desktop/Compressed/villa 4 new cropped.webp" data-src-mobile="media/Mobile Villas/Villa 4/villa4 Compressed.jpg" alt="Вілла 450 м² у Lion Hills, Лісники" style="--pos-mobile: 20% center">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa4/Desktop/Compressed/villa 4 new cropped.webp" data-src-mobile="media/Mobile Villas/Villa 4/villa4 Compressed.webp" alt="Вілла 450 м² у Lion Hills, Лісники" style="--pos-mobile: 20% center">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 450м<sup>2</sup></h3>
                             <p class="stories_sub">Архітектура вражень</p>
@@ -650,12 +650,12 @@
                     </div>
                     <div class="stories_slide">
                         <div class="stories_plan">
-                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa4.png" alt="Планування вілли 450 м²">
+                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa4.webp" alt="Планування вілли 450 м²">
                             <!-- mobile: one floor at a time, switched by the pills under it (scripts.js) -->
                             <div class="plan_floors" data-media="mobile">
                                 <div class="plan_floors_imgs">
-                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa 4 (1).png" alt="Планування вілли 450 м², перший поверх">
-                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa 4.png" alt="Планування вілли 450 м², другий поверх">
+                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa 4 (1).webp" alt="Планування вілли 450 м², перший поверх">
+                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa 4.webp" alt="Планування вілли 450 м², другий поверх">
                                 </div>
                                 <div class="plan_floors_actions">
                                     <div class="plan_floors_tabs">
@@ -674,7 +674,7 @@
                         </div>
                     </div>
                     <div class="stories_slide">
-                        <video class="stories_img" data-src="media/Desktop Villas/Villa4/Desktop/Compressed/Rooms Update.mp4" data-src-mobile="media/Mobile Villas/Villa 4/Rooms.mp4" muted loop playsinline preload="none"></video>
+                        <video class="stories_img" data-src="media/Desktop Villas/Villa1/Desktop/Compressed/Rooms Update.mp4" data-src-mobile="media/Mobile Villas/Villa 1/Rooms.mp4" muted loop playsinline preload="none" data-poster="media/Desktop Villas/Villa1/Desktop/Compressed/Rooms Update.poster.webp" data-poster-mobile="media/Mobile Villas/Villa 1/Rooms.poster.webp"></video>
                         <p class="stories_text"><span class="stories_mini">Крита тераса</span>Простора крита тераса площею 69 м² стає природним продовженням вітальні та відкривається до приватного саду. Тут достатньо місця для великої обідньої зони, відпочинку й зустрічей із друзями. Інтегрована в архітектуру вілли, вона створена для комфортного використання до дев’яти місяців на рік.</p>
                     </div>
                     <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
@@ -687,7 +687,7 @@
                 </div>
                 <div class="stories">
                     <div class="stories_slide active">
-                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/villa 5 new.webp" data-src-mobile="media/Mobile Villas/Villa 5/Villa5 Compressed.jpg" alt="Флагманська вілла 550 м² у Lion Hills, Лісники" style="--pos-mobile: 28% center">
+                        <img decoding="async" class="stories_img" data-load="critical" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/villa 5 new.webp" data-src-mobile="media/Mobile Villas/Villa 5/Villa5 Compressed.webp" alt="Флагманська вілла 550 м² у Lion Hills, Лісники" style="--pos-mobile: 28% center">
                         <div class="stories_caption">
                             <h3 class="stories_title">Вілла 550м<sup>2</sup></h3>
                             <p class="stories_sub">Флагманська вілла</p>
@@ -695,12 +695,12 @@
                     </div>
                     <div class="stories_slide">
                         <div class="stories_plan">
-                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa5.png" alt="Планування вілли 550 м²">
+                            <img data-media="desktop" decoding="async" data-src="media/floorplans/villas/villa5.webp" alt="Планування вілли 550 м²">
                             <!-- mobile: one floor at a time, switched by the pills under it (scripts.js) -->
                             <div class="plan_floors" data-media="mobile">
                                 <div class="plan_floors_imgs">
-                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa5.png" alt="Планування вілли 550 м², перший поверх">
-                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa5 (1).png" alt="Планування вілли 550 м², другий поверх">
+                                    <img class="plan_floor active" decoding="async" data-src="media/floorplans/villas/Mobile/villa5.webp" alt="Планування вілли 550 м², перший поверх">
+                                    <img class="plan_floor" decoding="async" data-src="media/floorplans/villas/Mobile/villa5 (1).webp" alt="Планування вілли 550 м², другий поверх">
                                 </div>
                                 <div class="plan_floors_actions">
                                     <div class="plan_floors_tabs">
@@ -719,11 +719,11 @@
                         </div>
                     </div>
                     <div class="stories_slide">
-                        <img decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/pool new.png" data-src-mobile="media/Mobile Villas/Villa 5/pool.png" alt="Приватний басейн з переливним краєм у флагманській віллі Lion Hills">
+                        <img decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/pool new.webp" data-src-mobile="media/Mobile Villas/Villa 5/pool.webp" alt="Приватний басейн з переливним краєм у флагманській віллі Lion Hills">
                         <p class="stories_text"><span class="stories_mini">Приватний басейн</span>Видовий басейн із переливним краєм створює ефект злиття води з горизонтом. Розташований серед природного ландшафту, він стає частиною архітектури резиденції — простором для плавання, відпочинку та насолоди панорамними краєвидами в повній приватності.</p>
                     </div>
                     <div class="stories_slide">
-                        <img decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/terrace.png" data-src-mobile="media/Mobile Villas/Villa 5/terrace.png" alt="Крита тераса понад 70 м² флагманської вілли Lion Hills">
+                        <img decoding="async" class="stories_img" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/terrace.webp" data-src-mobile="media/Mobile Villas/Villa 5/terrace.webp" alt="Крита тераса понад 70 м² флагманської вілли Lion Hills">
                         <p class="stories_text"><span class="stories_mini">Крита тераса</span>Крита тераса площею понад 70 м² відкриває панорамні краєвиди з найвищої точки пагорба. Інтегрована в архітектуру вілли, вона об’єднує обідню та лаунж-зони в єдиний простір для відпочинку й зустрічей із друзями до дев’яти місяців на рік.</p>
                     </div>
                     <button class="stories_prev" aria-label="Попередній слайд" hidden></button>
@@ -752,7 +752,7 @@
             <div class="carousel">
                 <div class="carousel_track" data-anim="stagger">
                     <article class="carousel_card">
-                        <img decoding="async" data-load="queue" data-src="media/LH media/Автономність/Compressed/Webp/safe.webp" data-src-mobile="media/LH media/Автономність/Compressed/Webp/saferoom_mob.png" alt="Safe room на мінус першому поверсі вілли Lion Hills">
+                        <img decoding="async" data-load="queue" data-src="media/LH media/Автономність/Compressed/Webp/safe.webp" data-src-mobile="media/LH media/Автономність/Compressed/Webp/saferoom_mob.webp" alt="Safe room на мінус першому поверсі вілли Lion Hills">
                         <h3>Safe room</h3>
                         <p>Кімнату безпеки ми спроектували на мінус першому поверсі, з подвійним залізобетонним перекриттям підвищеної міцності.</p>
                     </article>
@@ -786,7 +786,7 @@
                 <div class="gallery gallery_villas" data-anim="fade" id="penthouses-gallery">
                     <div class="gallery_stage">
                         <div class="gallery_item active" data-index="0">
-                            <img decoding="async" data-load="queue" data-src="media/LH media/Penthouses/Compressed/Webp/prostir2.jpg" alt="Простора вітальня пентхауса Lion Hills">
+                            <img decoding="async" data-load="queue" data-src="media/LH media/Penthouses/Compressed/Webp/prostir2.webp" alt="Простора вітальня пентхауса Lion Hills">
                         </div>
                         <div class="gallery_item" data-index="1">
                             <img decoding="async" data-src="media/LH media/Penthouses/Compressed/Webp/kraevid.webp" alt="Краєвид на Лісники з пентхауса Lion Hills">
@@ -861,7 +861,7 @@
 
             <div class="ready" data-quiz-trigger>
                 <div class="ready_box" data-anim="fade-only">
-                    <video data-load="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build2.mp4" data-src-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build 27.mp4" autoplay muted loop playsinline></video>
+                    <video data-load="queue" data-src="media/LH media/Готові юніти/Desktop/Compressed/build2.mp4" data-src-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build 27.mp4" autoplay muted loop playsinline data-poster="media/LH media/Готові юніти/Desktop/Compressed/build2.poster.webp" data-poster-mobile="media/LH media/Готові юніти/Mobile/Compressed/Build 27.poster.webp"></video>
                     <div class="ready_head">
                         <p class="ready_label">Готовність комплексу</p>
                         <h2 class="ready_title">2027 рік</h2>
@@ -1024,7 +1024,7 @@
                 <div class="quiz_cards">
                     <label class="quiz_card">
                         <input type="radio" name="type" value="Вілла">
-                        <img decoding="async" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/villa5.png" alt="">
+                        <img decoding="async" data-src="media/Desktop Villas/Villa5/Dekstop/Compressed/villa5.webp" alt="">
                         <span>Вілла</span>
                     </label>
                     <label class="quiz_card">

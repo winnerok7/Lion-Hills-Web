@@ -196,7 +196,10 @@ var loaderDone = new Promise(function (resolve) {
 
 (function () {
     Promise.all([window.criticalReady, loaderDone]).then(function () {
-        loadInTurn(criticalVideos.concat(loadGroup(['queue'])), QUEUE_SLOTS);
+        var list = criticalVideos.concat(loadGroup(['queue']));
+        // all the queue's posters first (small), so each video has its still long before its own turn comes
+        list.forEach(function (el) { if (el.tagName === 'VIDEO') setPoster(el); });
+        loadInTurn(list, QUEUE_SLOTS);
     });
 
     // the rest: whole gallery / carousel at once, standalone media by itself (stories handle their own)
