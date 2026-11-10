@@ -738,6 +738,7 @@ body {
     height: 100%;
     object-fit: cover;
     object-position: var(--pos, 50% 50%);
+    background-position: var(--pos, 50% 50%);
 }
 
 .stories_caption {
@@ -2649,6 +2650,14 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 
+/* a video's poster is also its CSS background (scripts.js setPoster), framed like the video (object-fit: cover):
+   iOS hides the poster once play() is called and draws nothing until the first frame, the background stays */
+video {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 /* ---------- Loader ---------- */
 /* timeline lives in animations.js (intro); without js-anim (reduced motion) there is no loader */
 
@@ -3438,6 +3447,7 @@ html:not(.js-anim) .loader {
 
     .stories_img {
         object-position: var(--pos-mobile, var(--pos, 50% 50%));
+        background-position: var(--pos-mobile, var(--pos, 50% 50%));
     }
 
     /* villa banners pull into the centre when the scroll stops near one (native touch scroll, no Lenis) */

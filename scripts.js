@@ -1,18 +1,15 @@
 // ---------- Media loading ----------
-// Everything below the hero has data-src instead of src (data-src-mobile, if set, wins on mobile; data-media drops an element on the other device). Order:
-// 1) critical, the loader waits for it (its drawing runs on a fixed time, then "завантаження…" if this isn't in yet):
-//    fonts + hero photo (preloaded in <head>) + [data-load="critical"] (first screens after the hero);
-//    a critical video with a poster only needs the poster (the video opens the queue), without one its first frame.
-//    Every video has data-poster (+ data-poster-mobile): its first frame as WebP, set together with the src
-// 2) queue: [data-load="queue"] in page order, QUEUE_SLOTS files at a time (first slide of the other sliders, build1/2)
-// 3) the rest: gallery/carousel slides once their block is about a screen away; stories load current + next slide
-// On mobile data-load-mobile overrides data-load: the critical videos go to the queue (iOS doesn't buffer
-// videos that aren't playing, so the loader would hang on them), critical is fonts + hero photo + the villa
-// covers (fast scrolling showed black banners while they loaded), and the rest waits for the loader to end.
-// Save-data / 2g: critical is only the fonts and the hero photo, everything else goes to the queue
+// Everything below the hero has data-src instead of src (data-src-mobile, if set, wins on mobile; data-media drops
+// an element on the other device). Two phases, so the page never shows an empty or black box:
+// 1) while the loader is on, and it waits for all of it (its drawing runs on a fixed time, then "завантаження…"):
+//    fonts + hero photo (preloaded in <head>), then every photo of the page (sliders, villa slides, plans, quiz)
+//    and every video's poster (data-poster / data-poster-mobile: its first frame as WebP)
+// 2) after the loader: the videos, one at a time in page order ([data-load] ones first). A block the visitor gets
+//    to sooner pulls its own videos in right away (gallery slide shown + the next one, stories current + next)
+// The poster is also the video's CSS background: iOS hides the poster as soon as play() is called and shows
+// nothing until frames arrive, the background stays. Save-data / 2g: the loader waits only for fonts + hero
 
-var CRITICAL_MAX = 9000; // ms, on a slow connection the loader gives up waiting after this and shows the page
-var QUEUE_SLOTS = 3;     // queue files loading at once
+var CRITICAL_MAX = 20000; // ms, on a very slow connection the loader gives up waiting after this; loading goes on
 var isMobile = window.matchMedia('(max-width: 767px)').matches;
 // touch devices (phones, iPads, also iPadOS in desktop mode that says "MacIntel"): iOS/iPadOS Safari doesn't
 // buffer a video that isn't playing, so for those only the metadata is waited for. isMobile stays the layout
@@ -51,33 +48,30 @@ function goTo(target) {
     }
 }
 
-// [data-load] elements of the given group(s), in page order; on a slow connection critical counts as queue
-function loadGroup(names) {
-    return Array.prototype.filter.call(document.querySelectorAll('[data-load]'), function (el) {
-        var group = isMobile && el.getAttribute('data-load-mobile') || el.getAttribute('data-load');
-        if (isSlowNet && group === 'critical') group = 'queue';
-        return names.indexOf(group) >= 0;
-    });
-}
+function toArray(list) { return Array.prototype.slice.call(list); }
 
-// load a list in order, `slots` files at a time; each slot moves on once its file is usable (or after 10s)
-function loadInTurn(list, slots) {
+// load a list in order, one file after another; each moves on once its file is usable (or after 15s)
+function loadInTurn(list) {
     var i = 0;
-    function next() {
+    (function next() {
         var el = list[i++];
         if (!el) return;
+        if (!el.hasAttribute('data-src')) return next(); // a block already pulled it in
         if (el.tagName === 'VIDEO') el.preload = 'auto';
-        loadMedia(el); // no-op if a block already pulled it in
-        whenLoaded(el).then(next);
-    }
-    for (var k = 0; k < slots; k++) next();
+        loadMedia(el);
+        whenLoaded(el, 15000).then(next);
+    })();
 }
 
-// a video's first frame as a still (data-poster / data-poster-mobile, WebP): shown until the video has frames,
-// so a slow video is never a black or white box. Returns the poster url, if any
+// a video's first frame as a still (data-poster / data-poster-mobile, WebP): the poster attribute and the
+// element's CSS background (style.css sizes it like the video), so a slow video is never a black or white box.
+// Returns the poster url, if any
 function setPoster(el) {
     var url = isMobile && el.getAttribute('data-poster-mobile') || el.getAttribute('data-poster');
-    if (url && !el.hasAttribute('poster')) el.poster = url;
+    if (url && !el.hasAttribute('poster')) {
+        el.poster = url;
+        el.style.backgroundImage = 'url("' + url.replace(/"/g, '\\"') + '")';
+    }
     return url;
 }
 
@@ -89,8 +83,6 @@ function loadMedia(el) {
     if (el.tagName === 'VIDEO') setPoster(el); // before the src, so the still is what shows while it loads
     el.removeAttribute('data-src');
     el.src = src;
-    // decode right away (off the main thread), not on the first paint mid-scroll / mid-animation
-    if (el.tagName === 'IMG' && el.decode) el.decode().catch(function () {});
 }
 
 function loadMediaIn(root) {
@@ -110,9 +102,9 @@ function whenLoaded(el, max) {
             if (el.readyState >= 1) return done();
             el.addEventListener('loadedmetadata', done, { once: true });
         } else if (el.tagName === 'VIDEO') {
-            // the first frame is enough: with preload="auto" the rest keeps coming in on its own
-            if (el.readyState >= 2) return done();
-            el.addEventListener('loadeddata', done, { once: true });
+            // buffered enough to play through: only then the next video starts, one download at a time
+            if (el.readyState >= 4) return done();
+            el.addEventListener('canplaythrough', done, { once: true });
         } else {
             if (el.complete && el.naturalWidth) return done();
             el.addEventListener('load', done, { once: true });
@@ -120,109 +112,66 @@ function whenLoaded(el, max) {
     });
 }
 
-// critical videos whose poster stood in for them during the loader; they open the queue
-var criticalVideos = [];
-
-// critical set: window.criticalReady (promise) + window.loadProgress() (0..1) for the loader;
-// animations.js holds the hero curtain on criticalReady too
+// phase 1: window.criticalReady (promise), the loader (animations.js) holds the hero curtain on it
 (function () {
-    var parts = []; // each: { done, fraction() }
-    var finished = false;
-
-    function track(promise, fraction) {
-        var part = { done: false, fraction: fraction || function () { return 0; } };
-        parts.push(part);
-        return Promise.resolve(promise).then(function () { part.done = true; });
-    }
-
     var waits = [];
-    waits.push(track(document.fonts ? document.fonts.ready : null));
+    var lite = isSlowNet; // save-data / 2g: don't hold the loader for the photos, they still load
+    function wait(p) { if (!lite) waits.push(p); }
+
+    waits.push(document.fonts ? document.fonts.ready : null);
 
     var media = document.querySelector('.hero_media');
     var bg = media && getComputedStyle(media).backgroundImage.match(/url\(["']?(.*?)["']?\)/);
     if (bg) {
-        var img = new Image();
-        img.src = bg[1];
-        waits.push(track(img.decode ? img.decode().catch(function () {}) : null));
+        var hero = new Image();
+        hero.src = bg[1];
+        waits.push(hero.decode ? hero.decode().catch(function () {}) : null);
     }
 
-    // all at once, in parallel with the hero; images are decoded up front too, so big ones (villa covers)
-    // don't stutter when scrolled to. A critical video only needs its poster here: the video file itself
-    // goes first in the queue, right after the loader
-    loadGroup(['critical']).forEach(function (el) {
-        if (el.tagName === 'VIDEO' && el.hasAttribute('data-poster')) {
-            var still = new Image();
-            still.src = setPoster(el);
-            waits.push(track(new Promise(function (resolve) {
-                var t = setTimeout(resolve, CRITICAL_MAX);
-                function ok() { clearTimeout(t); resolve(); }
-                if (still.decode) still.decode().then(ok, ok);
-                else { still.onload = ok; still.onerror = ok; }
-            })));
-            criticalVideos.push(el);
-            return;
-        }
-        if (el.tagName === 'VIDEO') el.preload = 'auto';
+    // every photo, in page order (the browser runs a few at a time); the villa covers are decoded up front too,
+    // big banners that would otherwise decode on the first paint mid-scroll
+    toArray(document.querySelectorAll('img[data-src]')).forEach(function (el) {
         loadMedia(el);
-        var usable = whenLoaded(el, CRITICAL_MAX).then(function () {
-            if (el.tagName === 'IMG' && el.decode) return el.decode().catch(function () {});
-        });
-        waits.push(track(usable, function () {
-            if (el.tagName !== 'VIDEO' || !el.duration || !el.buffered.length) return 0;
-            return Math.min(0.95, el.buffered.end(el.buffered.length - 1) / el.duration);
+        wait(whenLoaded(el, CRITICAL_MAX).then(function () {
+            if (el.decode && el.matches('.stories_slide:first-child img')) return el.decode().catch(function () {});
+        }));
+    });
+
+    // every video's poster (the video files come after the loader)
+    toArray(document.querySelectorAll('video[data-src]')).forEach(function (el) {
+        var url = setPoster(el);
+        if (!url) return;
+        var still = new Image();
+        still.src = url;
+        wait(new Promise(function (resolve) {
+            var t = setTimeout(resolve, CRITICAL_MAX);
+            function ok() { clearTimeout(t); resolve(); }
+            still.onload = ok;
+            still.onerror = ok;
+            if (still.complete) ok();
         }));
     });
 
     window.criticalReady = Promise.race([
         Promise.all(waits),
         new Promise(function (r) { setTimeout(r, CRITICAL_MAX); })
-    ]).then(function () { finished = true; });
-
-    window.loadProgress = function () {
-        if (finished || !parts.length) return 1;
-        var sum = 0;
-        parts.forEach(function (p) { sum += p.done ? 1 : p.fraction(); });
-        return sum / parts.length;
-    };
+    ]);
 })();
 
-// mobile: nothing else loads while the loader text animates, so it stays smooth;
 // animations.js fires 'loader:done' when the hero curtain starts (or when there is no loader)
 var loaderDone = new Promise(function (resolve) {
-    if (!isMobile || !document.documentElement.classList.contains('is-loading')) return resolve();
+    if (!document.documentElement.classList.contains('is-loading')) return resolve();
     window.addEventListener('loader:done', function () { resolve(); }, { once: true });
     setTimeout(resolve, CRITICAL_MAX + 5000); // animations.js failed
 });
 
-(function () {
-    Promise.all([window.criticalReady, loaderDone]).then(function () {
-        var list = criticalVideos.concat(loadGroup(['queue']));
-        // all the queue's posters first (small), so each video has its still long before its own turn comes
-        list.forEach(function (el) { if (el.tagName === 'VIDEO') setPoster(el); });
-        loadInTurn(list, QUEUE_SLOTS);
-    });
-
-    // the rest: whole gallery / carousel at once, standalone media by itself (stories handle their own)
-    var roots = [];
-    document.querySelectorAll('[data-src]').forEach(function (el) {
-        if (el.closest('.stories')) return;
-        var root = el.closest('.gallery, .carousel') || el;
-        if (roots.indexOf(root) < 0) roots.push(root);
-    });
-    var near = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-            if (!e.isIntersecting) return;
-            near.unobserve(e.target);
-            loadMediaIn(e.target);
-        });
-    }, { rootMargin: '100% 0px' });
-    // not before the critical set: on desktop the "Концепція" gallery is already within a screen at the top,
-    // and its other videos (~28MB) would take the bandwidth from the loader
-    Promise.all([window.criticalReady, loaderDone]).then(function () {
-        // a carousel is watched by its track (the row that actually comes into view)
-        roots.forEach(function (root) { near.observe(root.querySelector('.carousel_track') || root); });
-    });
-})();
+// phase 2: the videos, one at a time: the marked first ones ([data-load]: Bird, first gallery slides, build),
+// then the rest in page order. Galleries / stories pull their own in sooner when the visitor gets there
+Promise.all([window.criticalReady, loaderDone]).then(function () {
+    var all = toArray(document.querySelectorAll('video[data-src]'));
+    var first = all.filter(function (v) { return v.hasAttribute('data-load'); });
+    loadInTurn(first.concat(all.filter(function (v) { return first.indexOf(v) < 0; })));
+});
 
 
 document.querySelectorAll(".gallery").forEach(function (gallery) {
@@ -459,23 +408,6 @@ document.querySelectorAll('.plan_floors').forEach(function (box) {
         });
     });
 });
-
-// Once the first villa banner is near, all villa slides load in the background,
-// one file at a time in page order, so flipping through them never hits a black frame
-(function () {
-    var first = document.querySelector('.types .stories');
-    if (!first) return;
-    var started = false;
-    var obs = new IntersectionObserver(function (entries) {
-        if (!entries[0].isIntersecting || started) return;
-        started = true;
-        obs.disconnect();
-        window.criticalReady.then(function () {
-            loadInTurn(Array.prototype.slice.call(document.querySelectorAll('.types .stories [data-src]')), 1);
-        });
-    }, { rootMargin: '100% 0px' });
-    obs.observe(first);
-})();
 
 // Fixed layers that come and go (pill, its veil, the glass drawer) leave the render tree when hidden:
 // Safari 26 colours its bars from fixed elements at the screen edges even at opacity 0 / visibility hidden,
